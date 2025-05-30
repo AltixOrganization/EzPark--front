@@ -9,6 +9,10 @@ export class AuthService {
         try {
             const response = await apiService.post<AuthenticatedUser>('/authentication/sign-in', credentials);
 
+            // Imprimir el token en la consola
+            console.log('🔑 Token de autenticación:', response.token);
+            console.log('👤 Usuario autenticado:', response);
+
             // Store token and user data
             localStorage.setItem(this.TOKEN_KEY, response.token);
             localStorage.setItem(this.USER_KEY, JSON.stringify(response));
@@ -19,9 +23,16 @@ export class AuthService {
         }
     }
 
+    // ...existing code...
     static async signUp(userData: SignUpRequest): Promise<User> {
         try {
-            const response = await apiService.post<User>('/authentication/sign-up', userData);
+            // Asegurar que el usuario siempre tenga ambos roles si no se especifican
+            const dataToSend = {
+                ...userData,
+                roles: userData.roles || ['ROLE_GUEST', 'ROLE_HOST']
+            };
+            
+            const response = await apiService.post<User>('/authentication/sign-up', dataToSend);
             return response;
         } catch (error) {
             throw new Error(error instanceof Error ? error.message : 'Error al registrar usuario');

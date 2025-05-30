@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import AuthService from '../../auth/services/authService';
 import type { AuthContextType, SignInRequest, SignUpRequest, AuthenticatedUser } from '../../auth/types/auth.types';
+import { isTokenExpired } from '../../auth/utils/authUtils';
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Create the context with a default undefined value
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
     children: React.ReactNode;
@@ -13,11 +15,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Check if user is already logged in
+        // Check if user is already logged in on component mount
         const storedUser = AuthService.getStoredUser();
-        if (storedUser && AuthService.isAuthenticated()) {
+        const token = AuthService.getToken();
+
+        if (storedUser && token && !isTokenExpired(token)) {
             setUser(storedUser);
+        } else if (token || storedUser) {
+            // If token is expired but exists, clean up
+            AuthService.logout();
         }
+
         setLoading(false);
     }, []);
 
@@ -53,7 +61,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(null);
     };
 
-    const isAuthenticated = !!user && AuthService.isAuthenticated();
+    const isAuthenticated = !!user && !!AuthService.getToken() && !isTokenExpired(AuthService.getToken() || '');
 
     const value: AuthContextType = {
         user,
@@ -67,6 +75,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
+// Export the useAuth hook for easier consumption
 export const useAuth = (): AuthContextType => {
     const context = useContext(AuthContext);
     if (context === undefined) {

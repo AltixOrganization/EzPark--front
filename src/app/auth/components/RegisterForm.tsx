@@ -25,28 +25,29 @@ const RegisterForm = () => {
 
         // Validate passwords match
         if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match');
+            setError('Las contraseñas no coinciden');
             return;
         }
 
         setIsLoading(true);
 
         try {
+            // Asignar automáticamente ambos roles: ROLE_GUEST y ROLE_HOST
             const success = await AuthService.signUp({
                 email: formData.email,
                 username: formData.username,
                 password: formData.password,
-                roles: ['ROLE_GUEST'] // Default role
+                roles: ['ROLE_GUEST', 'ROLE_HOST']
             });
 
             if (success) {
                 // Redirect to login page after successful registration
-                navigate('/login', { state: { message: 'Registration successful! Please log in.' } });
+                navigate('/login', { state: { message: '¡Registro exitoso! Por favor inicia sesión.' } });
             } else {
-                setError('Registration failed. Please try again.');
+                setError('El registro falló. Por favor intenta nuevamente.');
             }
         } catch (err: any) {
-            setError(err.message || 'An error occurred during registration');
+            setError(err.message || 'Ocurrió un error durante el registro');
             console.error(err);
         } finally {
             setIsLoading(false);
@@ -54,9 +55,7 @@ const RegisterForm = () => {
     };
 
     return (
-        <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-lg">
-            <h2 className="text-2xl font-bold mb-6 text-center">Create an Account</h2>
-
+        <div className="max-w-md mx-auto">
             {error && <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">{error}</div>}
 
             <form onSubmit={handleSubmit}>
@@ -74,7 +73,7 @@ const RegisterForm = () => {
                 </div>
 
                 <div className="mb-4">
-                    <label htmlFor="username" className="block text-gray-700 font-medium mb-2">Username</label>
+                    <label htmlFor="username" className="block text-gray-700 font-medium mb-2">Nombre de usuario</label>
                     <input
                         type="text"
                         id="username"
@@ -87,7 +86,7 @@ const RegisterForm = () => {
                 </div>
 
                 <div className="mb-4">
-                    <label htmlFor="password" className="block text-gray-700 font-medium mb-2">Password</label>
+                    <label htmlFor="password" className="block text-gray-700 font-medium mb-2">Contraseña</label>
                     <input
                         type="password"
                         id="password"
@@ -98,12 +97,12 @@ const RegisterForm = () => {
                         required
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                        Password must be at least 3 characters and include at least one special character.
+                        La contraseña debe tener al menos 3 caracteres e incluir al menos un carácter especial.
                     </p>
                 </div>
 
                 <div className="mb-6">
-                    <label htmlFor="confirmPassword" className="block text-gray-700 font-medium mb-2">Confirm Password</label>
+                    <label htmlFor="confirmPassword" className="block text-gray-700 font-medium mb-2">Confirmar contraseña</label>
                     <input
                         type="password"
                         id="confirmPassword"
@@ -115,17 +114,23 @@ const RegisterForm = () => {
                     />
                 </div>
 
+                <div className="mb-6 bg-blue-50 p-4 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                        Al registrarte, podrás tanto buscar estacionamientos como ofrecer tus propios espacios para estacionar.
+                    </p>
+                </div>
+
                 <button
                     type="submit"
                     disabled={isLoading}
                     className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300"
                 >
-                    {isLoading ? 'Registering...' : 'Register'}
+                    {isLoading ? 'Registrando...' : 'Registrarse'}
                 </button>
             </form>
 
             <div className="mt-4 text-center">
-                <p>Already have an account? <Link to="/login" className="text-blue-600 hover:underline">Log In</Link></p>
+                <p>¿Ya tienes una cuenta? <Link to="/login" className="text-blue-600 hover:underline">Iniciar sesión</Link></p>
             </div>
         </div>
     );
