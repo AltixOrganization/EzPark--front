@@ -100,16 +100,6 @@ const MapWithSearch: React.FC = () => {
                             />
                         </Autocomplete>
                     </div>
-
-                    <div className="user-section">
-                        <img className="user-img" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="usuario" />
-
-                        <h1>usuario</h1>
-
-                        <button className="logout-button" onClick={() => console.log("Cerrar sesión")}>
-                            <img src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" alt="Cerrar sesión" style={{ width: "30px", height: "30px" }} />
-                        </button>
-                    </div>
                 </div>
             </div>
         </>

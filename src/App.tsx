@@ -1,25 +1,87 @@
-//import './App.css'
+import "./App.css";
+import { Route, Routes } from "react-router-dom";
+import { AuthProvider } from "./app/shared/context/AuthContext";
 import GoogleMapComponent from "./app/public/pages/home/components/GoogleMapComponent.tsx";
 import Header from "./app/public/components/header.tsx";
 import UserGaragesList from "./app/EzPark/garages/components/UserGaragesList.tsx";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import PublishGarage from "./app/EzPark/garages/components/PublishGarage.tsx";
+import LoginPage from "./app/auth/pages/LoginPage.tsx";
+import RegisterPage from "./app/auth/pages/RegisterPage.tsx";
+import ProtectedRoute from "./app/shared/components/ProtectedRoute.tsx";
 
 function App() {
+    return (
+        <AuthProvider>
+            <div className="App min-h-screen bg-gray-50">
+                <Routes>
+                    {/* Rutas de autenticación sin header */}
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
 
-  return (
-      <div className="App">
-          <Header />
-
-          <Routes>
-              <Route path="/" element={<GoogleMapComponent />} />
-              <Route path="/user-garages" element={<UserGaragesList />} />
-              <Route path="/publish-garage" element={<PublishGarage />} />
-
-              {/* Agrega otras rutas según sea necesario */}
-          </Routes>
-      </div>
-  )
+                    {/* Rutas con header */}
+                    <Route
+                        path="/"
+                        element={
+                            <>
+                                <Header />
+                                <GoogleMapComponent />
+                            </>
+                        }
+                    />
+                    <Route
+                        path="/user-garages"
+                        element={
+                            <>
+                                <Header />
+                                <ProtectedRoute>
+                                    <UserGaragesList />
+                                </ProtectedRoute>
+                            </>
+                        }
+                    />
+                    <Route
+                        path="/publish-garage"
+                        element={
+                            <>
+                                <Header />
+                                <ProtectedRoute>
+                                    <PublishGarage />
+                                </ProtectedRoute>
+                            </>
+                        }
+                    />
+                    <Route
+                        path="/my-reservations"
+                        element={
+                            <>
+                                <Header />
+                                <ProtectedRoute>
+                                    <div className="container mx-auto py-8 px-4">
+                                        <h1 className="text-2xl font-bold mb-6">Mis Reservas</h1>
+                                        <p className="text-gray-600">Aquí aparecerán tus reservas de estacionamiento.</p>
+                                    </div>
+                                </ProtectedRoute>
+                            </>
+                        }
+                    />
+                    <Route
+                        path="/parking-requests"
+                        element={
+                            <>
+                                <Header />
+                                <ProtectedRoute>
+                                    <div className="container mx-auto py-8 px-4">
+                                        <h1 className="text-2xl font-bold mb-6">Solicitudes de Estacionamiento</h1>
+                                        <p className="text-gray-600">Aquí aparecerán las solicitudes para tus espacios de estacionamiento.</p>
+                                    </div>
+                                </ProtectedRoute>
+                            </>
+                        }
+                    />
+                </Routes>
+            </div>
+        </AuthProvider>
+    );
 }
 
-export default App
+export default App;
