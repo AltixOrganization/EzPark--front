@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthService from '../services/authService';
+import carParkingLogo from '../../../assets/images/ezpark-logo.png'; // Asegúrate de que la ruta sea correcta
 
 const RegisterForm = () => {
     const [formData, setFormData] = useState({
         email: '',
-        username: '',
+        nombres: '',
+        apellidos: '',
         password: '',
         confirmPassword: ''
     });
@@ -35,7 +37,7 @@ const RegisterForm = () => {
             // Asignar automáticamente ambos roles: ROLE_GUEST y ROLE_HOST
             const success = await AuthService.signUp({
                 email: formData.email,
-                username: formData.username,
+                username: formData.nombres + ' ' + formData.apellidos, // Combinamos nombres y apellidos como username
                 password: formData.password,
                 roles: ['ROLE_GUEST', 'ROLE_HOST']
             });
@@ -55,82 +57,147 @@ const RegisterForm = () => {
     };
 
     return (
-        <div className="max-w-md mx-auto">
-            {error && <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">{error}</div>}
-
-            <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                    <label htmlFor="email" className="block text-gray-700 font-medium mb-2">Email</label>
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        required
-                    />
+        <div className="min-h-screen flex flex-col bg-white">
+            {/* Header with logo */}
+            <div className="p-4 flex items-center">
+                <div className="flex items-center">
+                    <img src={carParkingLogo} alt="EzPark Logo" className="h-14 w-14" /> {/* Logo exactamente 1.25x más grande */}
+                    <span className="ml-2 font-bold text-2xl"> {/* Tamaño de texto adecuado */}
+                        <span className="text-black">Ez</span>
+                        <span className="text-blue-600">Park</span>
+                    </span>
                 </div>
+            </div>
+            
+            {/* Línea gruesa */}
+            <div className="border-b-4 border-blue-600"></div>
 
-                <div className="mb-4">
-                    <label htmlFor="username" className="block text-gray-700 font-medium mb-2">Nombre de usuario</label>
-                    <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        value={formData.username}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        required
-                    />
+            {/* Main content area - takes full available height y CONTENIDO CENTRADO */}
+            <div className="flex flex-1 justify-center py-2"> {/* Centrado horizontal */}
+                <div className="flex max-w-6xl w-full scale-[1.25] origin-center transform-gpu"> {/* Escala exacta 1.25x */}
+                    {/* Left side - Image */}
+                    <div className="w-1/2 flex items-center justify-end p-6 pr-8"> {/* Ajuste de padding */}
+                        <img 
+                            src="/src/assets/images/ezPark_1.png" 
+                            alt="EzPark" 
+                            className="max-w-md" /* Tamaño adecuado para la escala */
+                        />
+                    </div>
+
+                    {/* Right side - Form */}
+                    <div className="w-1/2 flex flex-col justify-center p-6 pl-8"> {/* Ajuste de padding */}
+                        <h2 className="text-xl font-semibold text-gray-800 mb-1">Crear cuenta nueva</h2>
+                        <p className="text-sm text-gray-600 mb-4">Ingresa a tu cuenta y empieza a reservar estacionamientos</p>
+
+                        {error && (
+                            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded text-sm">
+                                {error}
+                            </div>
+                        )}
+
+                        <form onSubmit={handleSubmit} className="space-y-4 max-w-md"> {/* Adecuado para la escala */}
+                            <div>
+                                <label htmlFor="email" className="block text-sm text-gray-700 mb-1">
+                                    Email
+                                </label>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded"
+                                    required
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label htmlFor="nombres" className="block text-sm text-gray-700 mb-1">
+                                        Nombres
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="nombres"
+                                        name="nombres"
+                                        value={formData.nombres}
+                                        onChange={handleChange}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="apellidos" className="block text-sm text-gray-700 mb-1">
+                                        Apellidos
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="apellidos"
+                                        name="apellidos"
+                                        value={formData.apellidos}
+                                        onChange={handleChange}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label htmlFor="password" className="block text-sm text-gray-700 mb-1">
+                                        Contraseña
+                                    </label>
+                                    <input
+                                        type="password"
+                                        id="password"
+                                        name="password"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="confirmPassword" className="block text-sm text-gray-700 mb-1">
+                                        Repetir contraseña
+                                    </label>
+                                    <input
+                                        type="password"
+                                        id="confirmPassword"
+                                        name="confirmPassword"
+                                        value={formData.confirmPassword}
+                                        onChange={handleChange}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Fake CAPTCHA - solo visual, sin funcionalidad
+                            <div className="flex items-center space-x-2">
+                                <input type="checkbox" className="h-4 w-4" />
+                                <span className="text-sm text-gray-700">I am not a robot</span>
+                                <div className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded">
+                                    <span className="text-blue-500">↻</span>
+                                </div>
+                            </div> */}
+
+                            <button
+                                type="submit"
+                                disabled={isLoading}
+                                className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-200"
+                            >
+                                {isLoading ? 'Creando cuenta...' : 'Crear cuenta nueva'}
+                            </button>
+                        </form>
+
+                        <div className="mt-4 text-center max-w-md">
+                            <p className="text-sm">
+                                ¿Ya tienes una cuenta? <Link to="/login" className="text-blue-600 hover:underline">Iniciar sesión</Link>
+                            </p>
+                        </div>
+                    </div>
                 </div>
-
-                <div className="mb-4">
-                    <label htmlFor="password" className="block text-gray-700 font-medium mb-2">Contraseña</label>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        required
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                        La contraseña debe tener al menos 3 caracteres e incluir al menos un carácter especial.
-                    </p>
-                </div>
-
-                <div className="mb-6">
-                    <label htmlFor="confirmPassword" className="block text-gray-700 font-medium mb-2">Confirmar contraseña</label>
-                    <input
-                        type="password"
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        value={formData.confirmPassword}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        required
-                    />
-                </div>
-
-                <div className="mb-6 bg-blue-50 p-4 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                        Al registrarte, podrás tanto buscar estacionamientos como ofrecer tus propios espacios para estacionar.
-                    </p>
-                </div>
-
-                <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300"
-                >
-                    {isLoading ? 'Registrando...' : 'Registrarse'}
-                </button>
-            </form>
-
-            <div className="mt-4 text-center">
-                <p>¿Ya tienes una cuenta? <Link to="/login" className="text-blue-600 hover:underline">Iniciar sesión</Link></p>
             </div>
         </div>
     );

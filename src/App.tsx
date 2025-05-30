@@ -12,19 +12,13 @@ import ProtectedRoute from "./app/shared/components/ProtectedRoute.tsx";
 function App() {
     return (
         <AuthProvider>
-            <div className="App">
+            <div className="App min-h-screen bg-gray-50">
                 <Routes>
-                    {/* Rutas públicas */}
-                    <Route
-                        path="/login"
-                        element={<LoginPage />}
-                    />
-                    <Route
-                        path="/register"
-                        element={<RegisterPage />}
-                    />
+                    {/* Rutas de autenticación sin header */}
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
 
-                    {/* Ruta principal (mapa) - Visible para todos */}
+                    {/* Rutas con header */}
                     <Route
                         path="/"
                         element={
@@ -34,8 +28,6 @@ function App() {
                             </>
                         }
                     />
-
-                    {/* Rutas protegidas - Requieren autenticación */}
                     <Route
                         path="/user-garages"
                         element={
@@ -64,8 +56,8 @@ function App() {
                             <>
                                 <Header />
                                 <ProtectedRoute>
-                                    <div className="flex flex-col items-center justify-center h-screen">
-                                        <h1 className="text-2xl font-bold mb-4">Mis Reservas</h1>
+                                    <div className="container mx-auto py-8 px-4">
+                                        <h1 className="text-2xl font-bold mb-6">Mis Reservas</h1>
                                         <p className="text-gray-600">Aquí aparecerán tus reservas de estacionamiento.</p>
                                     </div>
                                 </ProtectedRoute>
@@ -78,8 +70,8 @@ function App() {
                             <>
                                 <Header />
                                 <ProtectedRoute>
-                                    <div className="flex flex-col items-center justify-center h-screen">
-                                        <h1 className="text-2xl font-bold mb-4">Solicitudes de Estacionamiento</h1>
+                                    <div className="container mx-auto py-8 px-4">
+                                        <h1 className="text-2xl font-bold mb-6">Solicitudes de Estacionamiento</h1>
                                         <p className="text-gray-600">Aquí aparecerán las solicitudes para tus espacios de estacionamiento.</p>
                                     </div>
                                 </ProtectedRoute>
