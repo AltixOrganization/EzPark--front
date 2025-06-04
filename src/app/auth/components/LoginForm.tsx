@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import AuthService from '../services/authService';
-import carParkingLogo from '../../../assets/images/ezpark-logo.png'; // Asegúrate de que la ruta sea correcta
+import { useAuth } from '../../shared/hooks/useAuth';
+import carParkingLogo from '../../../assets/images/ezpark-logo.png';
 
 const LoginForm = () => {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');  // Cambio: era 'username', ahora es 'email'
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
     const navigate = useNavigate();
+    const { login } = useAuth();  // Usar el hook de autenticación
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -17,8 +18,9 @@ const LoginForm = () => {
         setIsLoading(true);
 
         try {
-            const response = await AuthService.signIn({ username, password });
-            if (response) {
+            // Usar el método login del contexto que ya maneja el AuthService
+            const success = await login({ email, password });
+            if (success) {
                 navigate('/');
             } else {
                 setError('Credenciales inválidas. Por favor intenta de nuevo.');
@@ -47,10 +49,10 @@ const LoginForm = () => {
             {/* Línea gruesa */}
             <div className="border-b-4 border-blue-600"></div>
 
-            {/* Main content area - takes full available height y CONTENIDO CENTRADO */}
+            {/* Main content area */}
             <div className="flex flex-1 justify-center py-2">
                 <div className="flex max-w-6xl w-full scale-[1.25] origin-center transform-gpu">
-                    {/* Left side - Image (igual que en Register) */}
+                    {/* Left side - Image */}
                     <div className="w-1/2 flex items-center justify-end p-6 pr-8">
                         <img 
                             src="/src/assets/images/ezPark_1.png" 
@@ -72,15 +74,16 @@ const LoginForm = () => {
 
                         <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
                             <div>
-                                <label htmlFor="username" className="block text-sm text-gray-700 mb-1">
-                                    Nombre de usuario
+                                <label htmlFor="email" className="block text-sm text-gray-700 mb-1">
+                                    Email {/* Cambio: era 'Nombre de usuario', ahora es 'Email' */}
                                 </label>
                                 <input
-                                    type="text"
-                                    id="username"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
+                                    type="email"  // Cambio: era 'text', ahora es 'email'
+                                    id="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                     className="w-full px-3 py-2 border border-gray-300 rounded"
+                                    placeholder="tu@email.com"  // Añadido placeholder
                                     required
                                 />
                             </div>
@@ -105,7 +108,7 @@ const LoginForm = () => {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-200"
+                                className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-200 disabled:opacity-50"
                             >
                                 {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
                             </button>

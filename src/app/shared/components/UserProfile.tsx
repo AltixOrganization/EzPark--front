@@ -16,17 +16,18 @@ const UserProfile: React.FC<UserProfileProps> = ({ className = '' }) => {
         navigate('/login');
     };
 
-    // Email del usuario (podría venir del contexto de autenticación o ser un valor por defecto)
+    // Email del usuario viene del contexto de autenticación
     const userEmail = user?.email || 'usuario@ezpark.com';
 
-    // Nombre a mostrar (puede ser el username del usuario o un valor por defecto)
-    const displayName = user?.username || 'Usuario';
+    // Para el nombre a mostrar, como el backend no devuelve firstName/lastName en el sign-in,
+    // usaremos la parte antes del @ del email como nombre
+    const displayName = userEmail.split('@')[0] || 'Usuario';
 
     return (
         <div className={`relative ${className}`}>
             <button
                 onClick={() => setShowDropdown(!showDropdown)}
-                className="flex items-center bg-white rounded-full py-1 px-2 shadow-lg border border-gray-200 hover:shadow-xl transition-shadow w-64" // Más ancho
+                className="flex items-center bg-white rounded-full py-1 px-2 shadow-lg border border-gray-200 hover:shadow-xl transition-shadow w-64"
             >
                 <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center overflow-hidden">
                     <img
