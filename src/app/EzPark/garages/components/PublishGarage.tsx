@@ -2,10 +2,10 @@ import React, { useState, useRef } from "react";
 import { GoogleMap, Marker, useJsApiLoader, Autocomplete } from "@react-google-maps/api";
 import MapsCredential from "../../../credentials/MapsCredential.tsx";
 
-const containerStyle = {
+const mapContainerStyle = {
     width: "100%",
-    height: "400px",
-    borderRadius: "10px",
+    height: "100%",
+    borderRadius: "8px",
 };
 
 const defaultCenter = {
@@ -15,12 +15,11 @@ const defaultCenter = {
 
 const PublishGarage: React.FC = () => {
     const [formData, setFormData] = useState({
+        location: "",
         address: "",
-        title: "",
-        description: "",
-        length: "",
-        width: "",
-        height: "",
+        postalCode: "",
+        document: "",
+        details: ""
     });
 
     const [mapCenter, setMapCenter] = useState(defaultCenter);
@@ -50,7 +49,11 @@ const PublishGarage: React.FC = () => {
                 };
                 setMapCenter(newCenter);
                 setMarkerPosition(newCenter);
-                setFormData((prev) => ({ ...prev, address: place.formatted_address || "" }));
+                setFormData((prev) => ({ 
+                    ...prev, 
+                    location: place.formatted_address || "",
+                    address: place.formatted_address || "" 
+                }));
             }
         }
     };
@@ -62,7 +65,11 @@ const PublishGarage: React.FC = () => {
 
         geocoder.current.geocode({ location: { lat, lng } }, (results, status) => {
             if (status === "OK" && results && results[0]) {
-                setFormData((prev) => ({ ...prev, address: results[0].formatted_address }));
+                setFormData((prev) => ({ 
+                    ...prev, 
+                    location: results[0].formatted_address || "",
+                    address: results[0].formatted_address || "" 
+                }));
             } else {
                 console.error("No se pudo obtener la dirección:", status);
             }
@@ -86,100 +93,129 @@ const PublishGarage: React.FC = () => {
     };
 
     return isLoaded ? (
-        <div>
-            <h1>Publicar Garaje</h1>
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label>Dirección:</label>
-                    <Autocomplete
-                        onLoad={(autocomplete) => {
-                            autocompleteRef.current = autocomplete;
-                        }}
-                        onPlaceChanged={onPlaceChanged}
+        <div className="container mx-auto py-6 px-4">
+            <h1 className="text-xl font-bold mb-6">Registra tu garaje</h1>
+            
+            <div className="flex flex-col lg:flex-row gap-6">
+                {/* Columna izquierda - Formulario */}
+                <div className="w-full lg:w-1/2">
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div>
+                            <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
+                                Ubicación
+                            </label>
+                            <Autocomplete
+                                onLoad={(autocomplete) => {
+                                    autocompleteRef.current = autocomplete;
+                                }}
+                                onPlaceChanged={onPlaceChanged}
+                                restrictions={{ country: "pe" }}
+                            >
+                                <input
+                                    type="text"
+                                    id="location"
+                                    name="location"
+                                    value={formData.location}
+                                    onChange={handleInputChange}
+                                    placeholder="Buscar dirección"
+                                    ref={inputRef}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </Autocomplete>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+                                    Dirección
+                                </label>
+                                <input
+                                    type="text"
+                                    id="address"
+                                    name="address"
+                                    value={formData.address}
+                                    onChange={handleInputChange}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-1">
+                                    Código Postal
+                                </label>
+                                <input
+                                    type="text"
+                                    id="postalCode"
+                                    name="postalCode"
+                                    value={formData.postalCode}
+                                    onChange={handleInputChange}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label htmlFor="document" className="block text-sm font-medium text-gray-700 mb-1">
+                                Documento
+                            </label>
+                            <input
+                                type="text"
+                                id="document"
+                                name="document"
+                                value={formData.document}
+                                onChange={handleInputChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            />
+                        </div>
+                        
+                        <div>
+                            <label htmlFor="details" className="block text-sm font-medium text-gray-700 mb-1">
+                                Detalles adicionales
+                            </label>
+                            <input
+                                type="text"
+                                id="details"
+                                name="details"
+                                value={formData.details}
+                                onChange={handleInputChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            />
+                        </div>
+                        
+                        <div className="pt-2">
+                            <button
+                                type="button"
+                                className="w-full mb-2 bg-white border border-blue-600 text-blue-600 py-2 px-4 rounded-md hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                Subir Documentos
+                            </button>
+                            
+                            <button
+                                type="submit"
+                                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                Registrar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                {/* Columna derecha - Mapa */}
+                <div className="w-full lg:w-1/2 h-[500px]">
+                    <GoogleMap
+                        mapContainerStyle={mapContainerStyle}
+                        center={mapCenter}
+                        zoom={14}
+                        onClick={handleMapClick}
                     >
-                        <input
-                            type="text"
-                            name="address"
-                            value={formData.address}
-                            onChange={handleInputChange}
-                            placeholder="Selecciona o ingresa una dirección"
-                            ref={inputRef}
-                            style={{
-                                width: "100%",
-                                height: "40px",
-                                borderRadius: "5px",
-                                marginBottom: "10px",
-                            }}
-                        />
-                    </Autocomplete>
+                        <Marker position={markerPosition} />
+                    </GoogleMap>
                 </div>
-                <div>
-                    <label>Título:</label>
-                    <input
-                        type="text"
-                        name="title"
-                        value={formData.title}
-                        onChange={handleInputChange}
-                        placeholder="Título del garaje"
-                        style={{ width: "100%", height: "40px", borderRadius: "5px", marginBottom: "10px" }}
-                    />
-                </div>
-                <div>
-                    <label>Descripción:</label>
-                    <textarea
-                        name="description"
-                        value={formData.description}
-                        onChange={handleInputChange}
-                        placeholder="Breve descripción del garaje"
-                        style={{ width: "100%", height: "80px", borderRadius: "5px", marginBottom: "10px" }}
-                    />
-                </div>
-                <div>
-                    <label>Medidas (en metros):</label>
-                    <div style={{ display: "flex", gap: "10px" }}>
-                        <input
-                            type="number"
-                            name="length"
-                            value={formData.length}
-                            onChange={handleInputChange}
-                            placeholder="Largo"
-                            style={{ width: "100px", borderRadius: "5px" }}
-                        />
-                        <input
-                            type="number"
-                            name="width"
-                            value={formData.width}
-                            onChange={handleInputChange}
-                            placeholder="Ancho"
-                            style={{ width: "100px", borderRadius: "5px" }}
-                        />
-                        <input
-                            type="number"
-                            name="height"
-                            value={formData.height}
-                            onChange={handleInputChange}
-                            placeholder="Alto"
-                            style={{ width: "100px", borderRadius: "5px" }}
-                        />
-                    </div>
-                </div>
-                <button type="submit" style={{ marginTop: "20px", padding: "10px 20px", borderRadius: "5px" }}>
-                    Publicar Garaje
-                </button>
-            </form>
-
-            <h2>Selecciona la ubicación en el mapa:</h2>
-            <GoogleMap
-                mapContainerStyle={containerStyle}
-                center={mapCenter}
-                zoom={14}
-                onClick={handleMapClick}
-            >
-                <Marker position={markerPosition} />
-            </GoogleMap>
+            </div>
         </div>
     ) : (
-        <p>Cargando mapa...</p>
+        <div className="flex justify-center items-center h-[500px]">
+            <p className="text-lg">Cargando mapa...</p>
+        </div>
     );
 };
 
