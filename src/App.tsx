@@ -3,14 +3,16 @@ import { Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./app/shared/context/AuthContext";
 import GoogleMapComponent from "./app/public/pages/home/components/GoogleMapComponent.tsx";
 import Header from "./app/public/components/header.tsx";
-import UserGaragesList from "./app/EzPark/garages/components/UserGaragesList.tsx";
-import PublishGarage from "./app/EzPark/garages/components/PublishGarage.tsx";
 import LoginPage from "./app/auth/pages/LoginPage.tsx";
 import RegisterPage from "./app/auth/pages/RegisterPage.tsx";
 import ProfilePage from "./app/profile/pages/ProfilePage.tsx";
 import AdminPage from "./app/admin/page/AdminPage.tsx";
 import ProtectedRoute from "./app/shared/components/ProtectedRoute.tsx";
 import ProtectedAdminRoute from "./app/shared/components/ProtectedAdminRoute.tsx";
+
+// Importar los nuevos componentes de parking
+import CreateParkingPage from "./app/parking/pages/CreateParkingPage.tsx";
+import MyParkingsPage from "./app/parking/pages/MyParkingsPage.tsx";
 
 function App() {
     return (
@@ -53,13 +55,15 @@ function App() {
                             </>
                         }
                     />
+                    
+                    {/* Rutas de estacionamientos - ACTUALIZADAS */}
                     <Route
                         path="/user-garages"
                         element={
                             <>
                                 <Header />
                                 <ProtectedRoute>
-                                    <UserGaragesList />
+                                    <MyParkingsPage />
                                 </ProtectedRoute>
                             </>
                         }
@@ -70,11 +74,13 @@ function App() {
                             <>
                                 <Header />
                                 <ProtectedRoute>
-                                    <PublishGarage />
+                                    <CreateParkingPage />
                                 </ProtectedRoute>
                             </>
                         }
                     />
+                    
+                    {/* Otras rutas existentes */}
                     <Route
                         path="/my-reservations"
                         element={
