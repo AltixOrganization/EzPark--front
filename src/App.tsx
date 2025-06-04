@@ -9,6 +9,7 @@ import ProfilePage from "./app/profile/pages/ProfilePage.tsx";
 import AdminPage from "./app/admin/page/AdminPage.tsx";
 import ProtectedRoute from "./app/shared/components/ProtectedRoute.tsx";
 import ProtectedAdminRoute from "./app/shared/components/ProtectedAdminRoute.tsx";
+import AllParkingsPage from "./app/parking/pages/AllParkingsPage.tsx";
 
 // Importar los nuevos componentes de parking
 import CreateParkingPage from "./app/parking/pages/CreateParkingPage.tsx";
@@ -24,6 +25,16 @@ function App() {
                     <Route path="/register" element={<RegisterPage />} />
 
                     {/* Rutas con header */}
+                    
+                    <Route
+                        path="/estacionamientos"
+                        element={
+                            <>
+                                <Header />
+                                <AllParkingsPage />
+                            </>
+                        }
+                    />
                     <Route
                         path="/"
                         element={
