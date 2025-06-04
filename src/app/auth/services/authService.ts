@@ -24,20 +24,38 @@ export class AuthService {
             return response;
         } catch (error: any) {
             console.error('❌ Error en login:', error);
-            console.error('📋 Detalles del error:', {
-                message: error.message,
-                response: error.response,
-                stack: error.stack
-            });
-            throw new Error(error instanceof Error ? error.message : 'Error al iniciar sesión');
+            
+            // Mapear errores específicos del backend
+            if (error.message.includes('404') || error.message.includes('not found')) {
+                throw new Error('Usuario no encontrado. Verifica tu email.');
+            }
+            if (error.message.includes('401') || error.message.includes('Invalid credentials')) {
+                throw new Error('Credenciales incorrectas. Verifica tu email y contraseña.');
+            }
+            if (error.message.includes('400')) {
+                throw new Error('Datos inválidos. Verifica tu email y contraseña.');
+            }
+            
+            throw new Error(error.message || 'Error al iniciar sesión');
         }
     }
 
     static async signUp(userData: SignUpRequest): Promise<User> {
         try {
+            console.log('📤 Validando datos antes de enviar...');
+            
             // Validar que todos los campos requeridos estén presentes
             if (!userData.firstName || !userData.lastName || !userData.birthDate || !userData.email || !userData.password) {
                 throw new Error('Todos los campos son requeridos');
+            }
+
+            // Validar formato de nombres (debe coincidir con el backend: ^[A-Z][a-zA-Z]*$)
+            const nameRegex = /^[A-Z][a-zA-Z]*$/;
+            if (!nameRegex.test(userData.firstName)) {
+                throw new Error('El nombre debe empezar con mayúscula y contener solo letras (sin espacios)');
+            }
+            if (!nameRegex.test(userData.lastName)) {
+                throw new Error('El apellido debe empezar con mayúscula y contener solo letras (sin espacios)');
             }
 
             // Validar formato de email
@@ -46,12 +64,11 @@ export class AuthService {
                 throw new Error('Formato de email inválido');
             }
 
-            // Validar longitud de contraseña
-            if (userData.password.length < 8) {
-                throw new Error('La contraseña debe tener al menos 8 caracteres');
+            // Validar contraseña según reglas del backend
+            if (userData.password.length < 8 || userData.password.length > 30) {
+                throw new Error('La contraseña debe tener entre 8 y 30 caracteres');
             }
 
-            // Validar formato de contraseña (según el backend: mayúscula, minúscula, número)
             const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/;
             if (!passwordRegex.test(userData.password)) {
                 throw new Error('La contraseña debe contener al menos una mayúscula, una minúscula y un número');
@@ -74,14 +91,10 @@ export class AuthService {
                 roles: userData.roles || ['ROLE_GUEST']
             };
             
-            console.log('📤 Enviando datos de registro:', dataToSend);
-            console.log('🔍 Validación de datos:');
-            console.log('  - firstName:', typeof dataToSend.firstName, ':', dataToSend.firstName);
-            console.log('  - lastName:', typeof dataToSend.lastName, ':', dataToSend.lastName);
-            console.log('  - birthDate:', typeof dataToSend.birthDate, ':', dataToSend.birthDate);
-            console.log('  - email:', typeof dataToSend.email, ':', dataToSend.email);
-            console.log('  - password length:', dataToSend.password.length);
-            console.log('  - roles:', dataToSend.roles);
+            console.log('📤 Enviando datos de registro:', {
+                ...dataToSend,
+                password: '*'.repeat(dataToSend.password.length) // Ocultar password en logs
+            });
             
             const response = await apiService.post<User>('/authentication/sign-up', dataToSend);
             
@@ -90,33 +103,72 @@ export class AuthService {
             return response;
         } catch (error: any) {
             console.error('❌ Error en registro:', error);
-            console.error('📋 Detalles del error:', {
-                message: error.message,
-                response: error.response,
-                stack: error.stack
-            });
             
-            // Intentar obtener más detalles del error del backend
-            if (error.message.includes('Invalid parameter')) {
-                throw new Error('Uno o más campos tienen un formato inválido. Verifica que:\n- Los nombres no contengan números\n- El email sea válido\n- La fecha de nacimiento sea anterior a hoy\n- La contraseña tenga al menos 8 caracteres con mayúscula, minúscula y número');
+            // Mapear errores específicos del backend
+            if (error.message.includes('409') || error.message.includes('already exists')) {
+                throw new Error('El email ya está registrado. Usa otro email o inicia sesión.');
+            }
+            if (error.message.includes('400') || error.message.includes('Invalid parameter')) {
+                throw new Error('Datos inválidos. Verifica que:\n• Los nombres solo contengan letras y empiecen con mayúscula\n• El email sea válido\n• La fecha de nacimiento sea anterior a hoy\n• La contraseña cumpla con los requisitos');
+            }
+            if (error.message.includes('ERR_IAM')) {
+                throw new Error('Error en el sistema de autenticación. Intenta más tarde.');
             }
             
-            throw new Error(error instanceof Error ? error.message : 'Error al registrar usuario');
+            throw new Error(error.message || 'Error al registrar usuario');
         }
     }
 
     static logout(): void {
         localStorage.removeItem(this.TOKEN_KEY);
         localStorage.removeItem(this.USER_KEY);
+        console.log('👋 Usuario desconectado');
     }
 
     static getStoredUser(): AuthenticatedUser | null {
         try {
             const userData = localStorage.getItem(this.USER_KEY);
             return userData ? JSON.parse(userData) : null;
-        } catch {
+        } catch (error) {
+            console.error('Error al obtener usuario almacenado:', error);
             return null;
         }
+    }
+
+    /**
+     * Get user roles from stored user data
+     */
+    static getUserRoles(): string[] {
+        try {
+            const user = this.getStoredUser();
+            // ✅ Ahora el backend devuelve roles en el objeto user
+            return user?.roles || [];
+        } catch (error) {
+            console.error('Error al obtener roles del usuario:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Check if user has specific role
+     */
+    static hasRole(role: string): boolean {
+        const roles = this.getUserRoles();
+        return roles.includes(role);
+    }
+
+    /**
+     * Check if user is admin
+     */
+    static isAdmin(): boolean {
+        return this.hasRole('ROLE_ADMIN');
+    }
+
+    /**
+     * Check if user is host
+     */
+    static isHost(): boolean {
+        return this.hasRole('ROLE_HOST');
     }
 
     static getToken(): string | null {
@@ -126,7 +178,15 @@ export class AuthService {
     static isAuthenticated(): boolean {
         const token = this.getToken();
         const user = this.getStoredUser();
-        return !!(token && user);
+        const isValid = !!(token && user);
+        
+        if (isValid) {
+            console.log('✅ Usuario autenticado:', user?.email);
+        } else {
+            console.log('❌ Usuario no autenticado');
+        }
+        
+        return isValid;
     }
 }
 

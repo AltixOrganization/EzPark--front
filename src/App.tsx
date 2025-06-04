@@ -7,7 +7,10 @@ import UserGaragesList from "./app/EzPark/garages/components/UserGaragesList.tsx
 import PublishGarage from "./app/EzPark/garages/components/PublishGarage.tsx";
 import LoginPage from "./app/auth/pages/LoginPage.tsx";
 import RegisterPage from "./app/auth/pages/RegisterPage.tsx";
+import ProfilePage from "./app/profile/pages/ProfilePage.tsx";
+import AdminPage from "./app/admin/page/AdminPage.tsx";
 import ProtectedRoute from "./app/shared/components/ProtectedRoute.tsx";
+import ProtectedAdminRoute from "./app/shared/components/ProtectedAdminRoute.tsx";
 
 function App() {
     return (
@@ -25,6 +28,28 @@ function App() {
                             <>
                                 <Header />
                                 <GoogleMapComponent />
+                            </>
+                        }
+                    />
+                    <Route
+                        path="/admin"
+                        element={
+                            <>
+                                <Header />
+                                <ProtectedAdminRoute>
+                                    <AdminPage />
+                                </ProtectedAdminRoute>
+                            </>
+                        }
+                    />
+                    <Route
+                        path="/profile"
+                        element={
+                            <>
+                                <Header />
+                                <ProtectedRoute>
+                                    <ProfilePage />
+                                </ProtectedRoute>
                             </>
                         }
                     />

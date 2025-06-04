@@ -1,23 +1,24 @@
 // Auth Types based on your backend API
 export interface SignInRequest {
-    email: string;    // Cambio: era 'username', ahora es 'email'
+    email: string;
     password: string;
 }
 
 export interface SignUpRequest {
-    firstName: string;     // Nuevo: requerido por el backend
-    lastName: string;      // Nuevo: requerido por el backend
-    birthDate: string;     // Nuevo: requerido por el backend (formato YYYY-MM-DD)
+    firstName: string;
+    lastName: string;
+    birthDate: string;
     email: string;
     password: string;
     roles?: string[];
 }
 
-// El backend devuelve esta estructura para sign-in
+// El backend DEBE devolver esta estructura para sign-in (ACTUALIZADO)
 export interface AuthenticatedUser {
     id: number;
-    email: string;    // Cambio: era 'username', ahora es 'email'
+    email: string;
     token: string;
+    roles: string[]; // ✅ Ahora incluye roles
 }
 
 // El backend devuelve esta estructura para sign-up

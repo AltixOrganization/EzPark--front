@@ -20,14 +20,21 @@ const RegisterForm = () => {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        
+        // Auto-capitalizar nombres mientras se escribe
+        if (name === 'firstName' || name === 'lastName') {
+            const capitalizedValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+            setFormData(prev => ({ ...prev, [name]: capitalizedValue }));
+        } else {
+            setFormData(prev => ({ ...prev, [name]: value }));
+        }
     };
 
     // Validación específica para nombres (según el backend: ^[A-Z][a-zA-Z]*$)
     const validateName = (name: string, fieldName: string): string | null => {
         if (!name) return `${fieldName} es requerido`;
         if (!/^[A-Z][a-zA-Z]*$/.test(name)) {
-            return `${fieldName} debe empezar con mayúscula y contener solo letras (sin espacios)`;
+            return `${fieldName} debe empezar con mayúscula y contener solo letras (sin espacios ni números)`;
         }
         return null;
     };
@@ -89,14 +96,14 @@ const RegisterForm = () => {
         setIsLoading(true);
 
         try {
-            // Preparar datos para el backend
+            // Preparar datos para el backend - SIEMPRE con ambos roles
             const registrationData = {
                 firstName: formData.firstName.trim(),
                 lastName: formData.lastName.trim(),
                 birthDate: formData.birthDate,
                 email: formData.email.trim().toLowerCase(),
                 password: formData.password,
-                roles: ['ROLE_GUEST']
+                roles: ['ROLE_GUEST', 'ROLE_HOST'] // ✅ SIEMPRE ambos roles automáticamente
             };
 
             console.log('📤 Datos de registro a enviar:', registrationData);
@@ -106,7 +113,7 @@ const RegisterForm = () => {
             if (success) {
                 navigate('/login', { 
                     state: { 
-                        message: '¡Registro exitoso! Por favor inicia sesión con tu email y contraseña.' 
+                        message: '¡Registro exitoso! Ahora puedes buscar Y ofrecer estacionamientos. Inicia sesión con tu email y contraseña.' 
                     } 
                 });
             } else {
@@ -151,7 +158,9 @@ const RegisterForm = () => {
                     {/* Right side - Form */}
                     <div className="w-1/2 flex flex-col justify-center p-6 pl-8">
                         <h2 className="text-xl font-semibold text-gray-800 mb-1">Crear cuenta nueva</h2>
-                        <p className="text-sm text-gray-600 mb-4">Ingresa a tu cuenta y empieza a reservar estacionamientos</p>
+                        <p className="text-sm text-gray-600 mb-4">
+                            Únete a EzPark y disfruta de buscar Y ofrecer estacionamientos
+                        </p>
 
                         {error && (
                             <div className="mb-4 p-3 bg-red-100 text-red-700 rounded text-sm whitespace-pre-line">
@@ -180,7 +189,7 @@ const RegisterForm = () => {
                                 <div>
                                     <label htmlFor="firstName" className="block text-sm text-gray-700 mb-1">
                                         Nombres
-                                        <span className="text-xs text-gray-500 block">Debe empezar con mayúscula</span>
+                                        <span className="text-xs text-gray-500 block">Solo letras, sin espacios</span>
                                     </label>
                                     <input
                                         type="text"
@@ -191,14 +200,14 @@ const RegisterForm = () => {
                                         className="w-full px-3 py-2 border border-gray-300 rounded"
                                         placeholder="Juan"
                                         pattern="^[A-Z][a-zA-Z]*$"
-                                        title="Debe empezar con mayúscula y contener solo letras"
+                                        title="Solo letras, debe empezar con mayúscula"
                                         required
                                     />
                                 </div>
                                 <div>
                                     <label htmlFor="lastName" className="block text-sm text-gray-700 mb-1">
                                         Apellidos
-                                        <span className="text-xs text-gray-500 block">Debe empezar con mayúscula</span>
+                                        <span className="text-xs text-gray-500 block">Solo letras, sin espacios</span>
                                     </label>
                                     <input
                                         type="text"
@@ -209,7 +218,7 @@ const RegisterForm = () => {
                                         className="w-full px-3 py-2 border border-gray-300 rounded"
                                         placeholder="Perez"
                                         pattern="^[A-Z][a-zA-Z]*$"
-                                        title="Debe empezar con mayúscula y contener solo letras"
+                                        title="Solo letras, debe empezar con mayúscula"
                                         required
                                     />
                                 </div>
