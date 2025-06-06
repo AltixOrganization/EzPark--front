@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../shared/hooks/useAuth';
 import carParkingLogo from '../../../assets/images/ezpark-logo.png';
+import ezParkImage from '../../../../public/ezPark_1.png'; // Asegúrate de que la ruta sea correcta
+
 
 const LoginForm = () => {
     const [email, setEmail] = useState('');  // Cambio: era 'username', ahora es 'email'
@@ -45,7 +47,7 @@ const LoginForm = () => {
                     </span>
                 </div>
             </div>
-            
+
             {/* Línea gruesa */}
             <div className="border-b-4 border-blue-600"></div>
 
@@ -54,9 +56,9 @@ const LoginForm = () => {
                 <div className="flex max-w-6xl w-full scale-[1.25] origin-center transform-gpu">
                     {/* Left side - Image */}
                     <div className="w-1/2 flex items-center justify-end p-6 pr-8">
-                        <img 
-                            src="../public/ezPark_1.png" 
-                            alt="EzPark" 
+                        <img
+                            src={ezParkImage}
+                            alt="EzPark"
                             className="max-w-md"
                         />
                     </div>

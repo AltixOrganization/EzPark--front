@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../shared/hooks/useAuth';
 import carParkingLogo from '../../../assets/images/ezpark-logo.png';
-
+import ezParkImage from '../../../../public/ezPark_1.png'; // Asegúrate de que la ruta sea correcta
 const RegisterForm = () => {
     const [formData, setFormData] = useState({
         email: '',
@@ -149,7 +149,7 @@ const RegisterForm = () => {
                     {/* Left side - Image */}
                     <div className="w-1/2 flex items-center justify-end p-6 pr-8">
                         <img 
-                            src="../public/ezPark_1.png" 
+                             src={ezParkImage}  
                             alt="EzPark" 
                             className="max-w-md"
                         />
