@@ -1,8 +1,8 @@
 // src/app/parking/components/ParkingDetailsModal.tsx
 
 import React from 'react';
-import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
-import MapsCredential from "../../credentials/MapsCredential";
+import { GoogleMap, Marker } from "@react-google-maps/api";
+import { useGoogleMaps } from "../../shared/providers/GoogleMapsProvider";
 import type { Parking } from '../types/parking.types';
 import ScheduleManager from './schedule/ScheduleManager';
 
@@ -27,10 +27,7 @@ const ParkingDetailsModal: React.FC<ParkingDetailsModalProps> = ({
     onDelete,
     isOwner = false
 }) => {
-    const { isLoaded } = useJsApiLoader({
-        googleMapsApiKey: MapsCredential.mapsKey,
-        libraries: ["places"],
-    });
+    const { isLoaded, loadError } = useGoogleMaps();
 
     const mapCenter = {
         lat: parking.location.latitude,
@@ -59,6 +56,52 @@ const ParkingDetailsModal: React.FC<ParkingDetailsModalProps> = ({
     };
 
     const statusInfo = getStatusInfo();
+
+    // Renderizar el mapa solo cuando Google Maps esté completamente cargado
+    const renderMap = () => {
+        if (loadError) {
+            return (
+                <div className="h-[300px] bg-red-50 rounded-lg flex items-center justify-center border border-red-200">
+                    <div className="text-center text-red-600">
+                        <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 15.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                        <p className="text-sm">Error al cargar el mapa</p>
+                    </div>
+                </div>
+            );
+        }
+
+        if (!isLoaded) {
+            return (
+                <div className="h-[300px] bg-gray-100 rounded-lg flex items-center justify-center">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                        <p className="text-gray-600">Cargando mapa...</p>
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div className="border border-gray-300 rounded-lg overflow-hidden">
+                <GoogleMap
+                    mapContainerStyle={mapContainerStyle}
+                    center={mapCenter}
+                    zoom={16}
+                    options={{
+                        disableDefaultUI: false,
+                        zoomControl: true,
+                        streetViewControl: false,
+                        mapTypeControl: false,
+                        fullscreenControl: true,
+                    }}
+                >
+                    <Marker position={mapCenter} />
+                </GoogleMap>
+            </div>
+        );
+    };
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -219,7 +262,7 @@ const ParkingDetailsModal: React.FC<ParkingDetailsModalProps> = ({
                             )}
                         </div>
 
-                        {/* Mapa */}
+                        {/* Mapa y horarios */}
                         <div className="space-y-4">
                             <div>
                                 <h3 className="font-medium text-gray-900 mb-3 flex items-center">
@@ -228,31 +271,7 @@ const ParkingDetailsModal: React.FC<ParkingDetailsModalProps> = ({
                                     </svg>
                                     Ubicación en el mapa
                                 </h3>
-                                {isLoaded ? (
-                                    <div className="border border-gray-300 rounded-lg overflow-hidden">
-                                        <GoogleMap
-                                            mapContainerStyle={mapContainerStyle}
-                                            center={mapCenter}
-                                            zoom={16}
-                                            options={{
-                                                disableDefaultUI: false,
-                                                zoomControl: true,
-                                                streetViewControl: false,
-                                                mapTypeControl: false,
-                                                fullscreenControl: true,
-                                            }}
-                                        >
-                                            <Marker position={mapCenter} />
-                                        </GoogleMap>
-                                    </div>
-                                ) : (
-                                    <div className="h-[300px] bg-gray-100 rounded-lg flex items-center justify-center">
-                                        <div className="text-center">
-                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                                            <p className="text-gray-600">Cargando mapa...</p>
-                                        </div>
-                                    </div>
-                                )}
+                                {renderMap()}
                             </div>
 
                             {/* Coordenadas */}
@@ -263,6 +282,7 @@ const ParkingDetailsModal: React.FC<ParkingDetailsModalProps> = ({
                                     <div>Longitud: {parking.location.longitude.toFixed(6)}</div>
                                 </div>
                             </div>
+
                             {/* Schedule Manager (si es propietario) */}
                             {isOwner && (
                                 <div className="mt-6">

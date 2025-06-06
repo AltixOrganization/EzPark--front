@@ -21,8 +21,8 @@ const Header: React.FC = () => {
         <header className="w-full bg-white shadow-md">
             <div className="container mx-auto px-4 py-3">
                 <div className="flex justify-between items-center">
-                    {/* Logo a la izquierda, igual que en el formulario de registro */}
-                    <Link to="/" className="flex items-center">
+                    {/* Logo a la izquierda - ahora redirige a /home si está autenticado */}
+                    <Link to={isAuthenticated ? "/home" : "/"} className="flex items-center">
                         <img src={carParkingLogo} alt="EzPark Logo" className="h-10 w-10" />
                         <span className="ml-2 font-bold text-xl">
                             <span className="text-black">Ez</span>
@@ -33,6 +33,9 @@ const Header: React.FC = () => {
                     {/* Secciones de navegación a la derecha */}
                     {isAuthenticated ? (
                         <nav className="flex items-center space-x-8">
+                            <Link to="/home" className={`font-medium ${isActive('/home')}`}>
+                                Mapa
+                            </Link>
                             <Link to="/estacionamientos" className={`font-medium ${isActive('/estacionamientos')}`}>
                                 Buscar Estacionamiento
                             </Link>
@@ -80,7 +83,7 @@ const Header: React.FC = () => {
             </div>
 
             {/* Barra de búsqueda debajo del header cuando estamos en la página de inicio */}
-            {isAuthenticated && location.pathname === '/' && (
+            {isAuthenticated && location.pathname === '/home' && (
                 <div className="bg-white border-t border-gray-200 py-2 px-4 shadow-sm">
                     <div className="max-w-3xl mx-auto">
                         <div className="relative rounded-md shadow-sm">

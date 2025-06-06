@@ -1,8 +1,8 @@
 // src/app/parking/components/EditParkingModal.tsx
 
 import React, { useState, useRef, useEffect } from "react";
-import { GoogleMap, Marker, useJsApiLoader, Autocomplete } from "@react-google-maps/api";
-import MapsCredential from "../../credentials/MapsCredential";
+import { GoogleMap, Marker, Autocomplete } from "@react-google-maps/api";
+import { useGoogleMaps } from "../../shared/providers/GoogleMapsProvider";
 import { useParking } from "../hooks/useParking";
 import type { Parking, ParkingFormData, UpdateParkingRequest } from "../types/parking.types";
 
@@ -19,6 +19,7 @@ interface EditParkingModalProps {
 
 const EditParkingModal: React.FC<EditParkingModalProps> = ({ parking, onClose }) => {
     const { updateParking, updating, error, clearError } = useParking();
+    const { isLoaded, loadError } = useGoogleMaps();
     
     // Estados del formulario
     const [formData, setFormData] = useState<ParkingFormData>({
@@ -54,11 +55,6 @@ const EditParkingModal: React.FC<EditParkingModalProps> = ({ parking, onClose })
     // Estados de validación
     const [validationErrors, setValidationErrors] = useState<string[]>([]);
     const [showSuccess, setShowSuccess] = useState(false);
-
-    const { isLoaded } = useJsApiLoader({
-        googleMapsApiKey: MapsCredential.mapsKey,
-        libraries: ["places"],
-    });
 
     // ===============================
     // EFECTOS
@@ -295,6 +291,49 @@ const EditParkingModal: React.FC<EditParkingModalProps> = ({ parking, onClose })
         }
     };
 
+    // ===============================
+    // RENDERIZADO DEL MAPA
+    // ===============================
+
+    const renderMap = () => {
+        if (loadError) {
+            return (
+                <div className="h-[300px] bg-red-50 rounded-lg flex items-center justify-center border border-red-200">
+                    <div className="text-center text-red-600">
+                        <svg className="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 15.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                        <p className="text-sm">Error al cargar el mapa</p>
+                    </div>
+                </div>
+            );
+        }
+
+        if (!isLoaded) {
+            return (
+                <div className="h-[300px] bg-gray-100 rounded-lg flex items-center justify-center">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                        <p className="text-gray-600">Cargando mapa...</p>
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div className="h-full border border-gray-300 rounded-lg overflow-hidden">
+                <GoogleMap
+                    mapContainerStyle={mapContainerStyle}
+                    center={mapCenter}
+                    zoom={14}
+                    onClick={handleMapClick}
+                >
+                    <Marker position={markerPosition} />
+                </GoogleMap>
+            </div>
+        );
+    };
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-screen overflow-y-auto">
@@ -347,16 +386,16 @@ const EditParkingModal: React.FC<EditParkingModalProps> = ({ parking, onClose })
                         </div>
                     )}
 
-                    {isLoaded ? (
-                        <div className="flex flex-col lg:flex-row gap-6">
-                            {/* Formulario */}
-                            <div className="w-full lg:w-1/2">
-                                <form onSubmit={handleSubmit} className="space-y-4">
-                                    {/* Ubicación con autocompletado */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Buscar nueva ubicación
-                                        </label>
+                    <div className="flex flex-col lg:flex-row gap-6">
+                        {/* Formulario */}
+                        <div className="w-full lg:w-1/2">
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                {/* Ubicación con autocompletado */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Buscar nueva ubicación
+                                    </label>
+                                    {isLoaded && (
                                         <Autocomplete
                                             onLoad={(autocomplete) => {
                                                 autocompleteRef.current = autocomplete;
@@ -370,216 +409,202 @@ const EditParkingModal: React.FC<EditParkingModalProps> = ({ parking, onClose })
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                             />
                                         </Autocomplete>
-                                    </div>
+                                    )}
+                                </div>
 
-                                    {/* Información de ubicación */}
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
-                                                Dirección
-                                            </label>
-                                            <input
-                                                type="text"
-                                                id="address"
-                                                name="address"
-                                                value={formData.address}
-                                                onChange={handleInputChange}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                                required
-                                            />
-                                        </div>
-                                        <div>
-                                            <label htmlFor="district" className="block text-sm font-medium text-gray-700 mb-1">
-                                                Distrito
-                                            </label>
-                                            <input
-                                                type="text"
-                                                id="district"
-                                                name="district"
-                                                value={formData.district}
-                                                onChange={handleInputChange}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Dimensiones */}
-                                    <div className="grid grid-cols-3 gap-4">
-                                        <div>
-                                            <label htmlFor="width" className="block text-sm font-medium text-gray-700 mb-1">
-                                                Ancho (m)
-                                            </label>
-                                            <input
-                                                type="number"
-                                                id="width"
-                                                name="width"
-                                                value={formData.width}
-                                                onChange={handleInputChange}
-                                                step="0.1"
-                                                min="0.1"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                                required
-                                            />
-                                        </div>
-                                        <div>
-                                            <label htmlFor="length" className="block text-sm font-medium text-gray-700 mb-1">
-                                                Largo (m)
-                                            </label>
-                                            <input
-                                                type="number"
-                                                id="length"
-                                                name="length"
-                                                value={formData.length}
-                                                onChange={handleInputChange}
-                                                step="0.1"
-                                                min="0.1"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                                required
-                                            />
-                                        </div>
-                                        <div>
-                                            <label htmlFor="height" className="block text-sm font-medium text-gray-700 mb-1">
-                                                Altura (m)
-                                            </label>
-                                            <input
-                                                type="number"
-                                                id="height"
-                                                name="height"
-                                                value={formData.height}
-                                                onChange={handleInputChange}
-                                                step="0.1"
-                                                min="0.1"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Precio, espacios y teléfono */}
-                                    <div className="grid grid-cols-3 gap-4">
-                                        <div>
-                                            <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-                                                Precio/hora (S/)
-                                            </label>
-                                            <input
-                                                type="number"
-                                                id="price"
-                                                name="price"
-                                                value={formData.price}
-                                                onChange={handleInputChange}
-                                                step="0.50"
-                                                min="0.50"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                                required
-                                            />
-                                        </div>
-                                        <div>
-                                            <label htmlFor="space" className="block text-sm font-medium text-gray-700 mb-1">
-                                                Espacios
-                                            </label>
-                                            <input
-                                                type="number"
-                                                id="space"
-                                                name="space"
-                                                value={formData.space}
-                                                onChange={handleInputChange}
-                                                min="1"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                                required
-                                            />
-                                        </div>
-                                        <div>
-                                            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                                                Teléfono
-                                            </label>
-                                            <input
-                                                type="tel"
-                                                id="phone"
-                                                name="phone"
-                                                value={formData.phone}
-                                                onChange={handleInputChange}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Descripción */}
+                                {/* Información de ubicación */}
+                                <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                                            Descripción
+                                        <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+                                            Dirección
                                         </label>
-                                        <textarea
-                                            id="description"
-                                            name="description"
-                                            value={formData.description}
+                                        <input
+                                            type="text"
+                                            id="address"
+                                            name="address"
+                                            value={formData.address}
                                             onChange={handleInputChange}
-                                            rows={3}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                             required
                                         />
-                                        <p className="text-sm text-gray-500 mt-1">
-                                            Caracteres: {formData.description.length}
-                                        </p>
                                     </div>
-
-                                    {/* Botones */}
-                                    <div className="flex space-x-3 pt-4">
-                                        <button
-                                            type="button"
-                                            onClick={onClose}
-                                            className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 transition duration-200"
-                                            disabled={updating}
-                                        >
-                                            Cancelar
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            disabled={updating}
-                                            className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                                        >
-                                            {updating ? (
-                                                <>
-                                                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                    </svg>
-                                                    Actualizando...
-                                                </>
-                                            ) : (
-                                                'Guardar cambios'
-                                            )}
-                                        </button>
+                                    <div>
+                                        <label htmlFor="district" className="block text-sm font-medium text-gray-700 mb-1">
+                                            Distrito
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="district"
+                                            name="district"
+                                            value={formData.district}
+                                            onChange={handleInputChange}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                            required
+                                        />
                                     </div>
-                                </form>
-                            </div>
-
-                            {/* Mapa */}
-                            <div className="w-full lg:w-1/2">
-                                <div className="h-full border border-gray-300 rounded-lg overflow-hidden">
-                                    <GoogleMap
-                                        mapContainerStyle={mapContainerStyle}
-                                        center={mapCenter}
-                                        zoom={14}
-                                        onClick={handleMapClick}
-                                    >
-                                        <Marker position={markerPosition} />
-                                    </GoogleMap>
                                 </div>
-                                <p className="text-sm text-gray-500 mt-2">
-                                    Haz clic en el mapa para actualizar la ubicación
-                                </p>
-                            </div>
+
+                                {/* Dimensiones */}
+                                <div className="grid grid-cols-3 gap-4">
+                                    <div>
+                                        <label htmlFor="width" className="block text-sm font-medium text-gray-700 mb-1">
+                                            Ancho (m)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            id="width"
+                                            name="width"
+                                            value={formData.width}
+                                            onChange={handleInputChange}
+                                            step="0.1"
+                                            min="0.1"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="length" className="block text-sm font-medium text-gray-700 mb-1">
+                                            Largo (m)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            id="length"
+                                            name="length"
+                                            value={formData.length}
+                                            onChange={handleInputChange}
+                                            step="0.1"
+                                            min="0.1"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="height" className="block text-sm font-medium text-gray-700 mb-1">
+                                            Altura (m)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            id="height"
+                                            name="height"
+                                            value={formData.height}
+                                            onChange={handleInputChange}
+                                            step="0.1"
+                                            min="0.1"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Precio, espacios y teléfono */}
+                                <div className="grid grid-cols-3 gap-4">
+                                    <div>
+                                        <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
+                                            Precio/hora (S/)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            id="price"
+                                            name="price"
+                                            value={formData.price}
+                                            onChange={handleInputChange}
+                                            step="0.50"
+                                            min="0.50"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="space" className="block text-sm font-medium text-gray-700 mb-1">
+                                            Espacios
+                                        </label>
+                                        <input
+                                            type="number"
+                                            id="space"
+                                            name="space"
+                                            value={formData.space}
+                                            onChange={handleInputChange}
+                                            min="1"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                                            Teléfono
+                                        </label>
+                                        <input
+                                            type="tel"
+                                            id="phone"
+                                            name="phone"
+                                            value={formData.phone}
+                                            onChange={handleInputChange}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Descripción */}
+                                <div>
+                                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                                        Descripción
+                                    </label>
+                                    <textarea
+                                        id="description"
+                                        name="description"
+                                        value={formData.description}
+                                        onChange={handleInputChange}
+                                        rows={3}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                        required
+                                    />
+                                    <p className="text-sm text-gray-500 mt-1">
+                                        Caracteres: {formData.description.length}
+                                    </p>
+                                </div>
+
+                                {/* Botones */}
+                                <div className="flex space-x-3 pt-4">
+                                    <button
+                                        type="button"
+                                        onClick={onClose}
+                                        className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 transition duration-200"
+                                        disabled={updating}
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={updating}
+                                        className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                                    >
+                                        {updating ? (
+                                            <>
+                                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                Actualizando...
+                                            </>
+                                        ) : (
+                                            'Guardar cambios'
+                                        )}
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                    ) : (
-                        <div className="flex justify-center items-center h-64">
-                            <div className="text-center">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                                <p className="text-gray-600">Cargando mapa...</p>
+
+                        {/* Mapa */}
+                        <div className="w-full lg:w-1/2">
+                            <div className="h-full min-h-[400px]">
+                                {renderMap()}
                             </div>
+                            <p className="text-sm text-gray-500 mt-2">
+                                Haz clic en el mapa para actualizar la ubicación
+                            </p>
                         </div>
-                    )}
+                    </div>
                 </div>
             </div>
         </div>

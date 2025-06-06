@@ -21,7 +21,7 @@ const LoginForm = () => {
             // Usar el método login del contexto que ya maneja el AuthService
             const success = await login({ email, password });
             if (success) {
-                navigate('/');
+                navigate('/my-reservations');
             } else {
                 setError('Credenciales inválidas. Por favor intenta de nuevo.');
             }
