@@ -10,7 +10,7 @@ import type {
     MapLocation
 } from '../types/parking.types';
 
-const API_BASE_URL = 'http://localhost:8081'; // Agregamos esta constante
+const API_BASE_URL = 'https://ezpark-web-service.onrender.com'; // Agregamos esta constante
 
 export class ParkingService {
     private static readonly PARKING_BASE_PATH = '/parking';
