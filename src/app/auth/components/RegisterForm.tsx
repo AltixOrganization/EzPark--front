@@ -149,7 +149,7 @@ const RegisterForm = () => {
                     {/* Left side - Image */}
                     <div className="w-1/2 flex items-center justify-end p-6 pr-8">
                         <img 
-                            src="/src/assets/images/ezPark_1.png" 
+                            src="../public/ezPark_1.png" 
                             alt="EzPark" 
                             className="max-w-md"
                         />
