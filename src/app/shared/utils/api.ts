@@ -19,7 +19,7 @@ export class ApiService {
     ): Promise<T> {
         const url = `${API_BASE_URL}${endpoint}`;
 
-        const defaultHeaders = {
+        const defaultHeaders: Record<string, string> = {
             'Content-Type': 'application/json',
         };
 

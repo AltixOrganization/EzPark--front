@@ -1,6 +1,6 @@
 // src/app/shared/providers/GoogleMapsProvider.tsx
 
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, type ReactNode } from 'react';
 import { useJsApiLoader } from '@react-google-maps/api';
 import MapsCredential from '../../credentials/MapsCredential';
 import LoadingSpinner from '../components/LoadingSpinner';
