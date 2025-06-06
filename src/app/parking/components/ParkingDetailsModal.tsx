@@ -4,6 +4,7 @@ import React from 'react';
 import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 import MapsCredential from "../../credentials/MapsCredential";
 import type { Parking } from '../types/parking.types';
+import ScheduleManager from './schedule/ScheduleManager';
 
 const mapContainerStyle = {
     width: "100%",
@@ -192,7 +193,7 @@ const ParkingDetailsModal: React.FC<ParkingDetailsModalProps> = ({
                                 </h3>
                                 <div className="flex items-center space-x-3">
                                     <span className="text-gray-500 text-sm">Teléfono:</span>
-                                    <a 
+                                    <a
                                         href={`tel:${parking.phone}`}
                                         className="font-medium text-blue-600 hover:text-blue-700 text-sm"
                                     >
@@ -262,6 +263,15 @@ const ParkingDetailsModal: React.FC<ParkingDetailsModalProps> = ({
                                     <div>Longitud: {parking.location.longitude.toFixed(6)}</div>
                                 </div>
                             </div>
+                            {/* Schedule Manager (si es propietario) */}
+                            {isOwner && (
+                                <div className="mt-6">
+                                    <ScheduleManager
+                                        parkingId={parking.id!}
+                                        parkingName={parking.location.district}
+                                    />
+                                </div>
+                            )}
 
                             {/* Horarios (si los hay) */}
                             {parking.schedules && parking.schedules.length > 0 && (
@@ -281,11 +291,10 @@ const ParkingDetailsModal: React.FC<ParkingDetailsModalProps> = ({
                                                 <span className="font-medium">
                                                     {schedule.startTime} - {schedule.endTime}
                                                 </span>
-                                                <span className={`px-2 py-1 rounded-full text-xs ${
-                                                    schedule.isAvailable 
-                                                        ? 'bg-green-100 text-green-800' 
+                                                <span className={`px-2 py-1 rounded-full text-xs ${schedule.isAvailable
+                                                        ? 'bg-green-100 text-green-800'
                                                         : 'bg-red-100 text-red-800'
-                                                }`}>
+                                                    }`}>
                                                     {schedule.isAvailable ? 'Disponible' : 'Ocupado'}
                                                 </span>
                                             </div>
@@ -309,7 +318,7 @@ const ParkingDetailsModal: React.FC<ParkingDetailsModalProps> = ({
                         >
                             Cerrar
                         </button>
-                        
+
                         {isOwner && onEdit && (
                             <button
                                 onClick={onEdit}
@@ -321,7 +330,7 @@ const ParkingDetailsModal: React.FC<ParkingDetailsModalProps> = ({
                                 <span>Editar</span>
                             </button>
                         )}
-                        
+
                         {isOwner && onDelete && (
                             <button
                                 onClick={onDelete}

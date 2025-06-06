@@ -9,15 +9,17 @@ import EditParkingModal from '../components/EditParkingModal';
 // import DeleteConfirmationModal from '../components/DeleteConfirmationModal'; // Modal complejo comentado
 import ParkingDetailsModal from '../components/ParkingDetailsModal'; // Nota: hay un typo en el nombre del archivo
 import type { Parking } from '../types/parking.types';
+import ScheduleManager from '../components/schedule/ScheduleManager';
+
 
 const MyParkingsPage: React.FC = () => {
-    const { 
-        userParkings, 
-        loading, 
-        error, 
-        deleteParking, 
+    const {
+        userParkings,
+        loading,
+        error,
+        deleteParking,
         deleting,
-        loadUserParkings 
+        loadUserParkings
     } = useParking();
 
     // Estados para los modales
@@ -25,6 +27,8 @@ const MyParkingsPage: React.FC = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false); // Modal simple
     const [deletingParkingData, setDeletingParkingData] = useState<Parking | null>(null);
     const [viewingParking, setViewingParking] = useState<Parking | null>(null);
+    const [showingSchedules, setShowingSchedules] = useState<Parking | null>(null);
+
 
     // Estados para filtros y ordenamiento
     const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
@@ -71,6 +75,11 @@ const MyParkingsPage: React.FC = () => {
         setDeletingParkingData(null);
         setViewingParking(null);
     };
+
+    const handleManageSchedules = (parking: Parking) => {
+        setShowingSchedules(parking);
+    };
+
 
     // Filtrar y ordenar estacionamientos
     const filteredAndSortedParkings = React.useMemo(() => {
@@ -153,7 +162,7 @@ const MyParkingsPage: React.FC = () => {
                             No tienes estacionamientos registrados
                         </h3>
                         <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                            Comienza a generar ingresos registrando tu primer espacio de estacionamiento. 
+                            Comienza a generar ingresos registrando tu primer espacio de estacionamiento.
                             Es rápido y fácil.
                         </p>
                         <Link
@@ -175,8 +184,8 @@ const MyParkingsPage: React.FC = () => {
                                 {filteredAndSortedParkings.length} de {userParkings.length} estacionamiento{userParkings.length !== 1 ? 's' : ''} mostrado{userParkings.length !== 1 ? 's' : ''}
                             </p>
                             <div className="flex items-center space-x-4">
-                                <select 
-                                    value={statusFilter} 
+                                <select
+                                    value={statusFilter}
                                     onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
                                     className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                 >
@@ -184,8 +193,8 @@ const MyParkingsPage: React.FC = () => {
                                     <option value="active">Activos (disponibles)</option>
                                     <option value="inactive">Sin espacios</option>
                                 </select>
-                                <select 
-                                    value={sortBy} 
+                                <select
+                                    value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value as 'date' | 'price' | 'name')}
                                     className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                 >
@@ -252,7 +261,7 @@ const MyParkingsPage: React.FC = () => {
             </div>
 
             {/* Modales */}
-            
+
             {/* Modal de edición */}
             {editingParking && (
                 <EditParkingModal
@@ -327,6 +336,32 @@ const MyParkingsPage: React.FC = () => {
                     }}
                     isOwner={true}
                 />
+            )}
+
+            {showingSchedules && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-y-auto">
+                        <div className="p-6">
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-xl font-semibold">
+                                    Horarios - {showingSchedules.location.district}
+                                </h2>
+                                <button
+                                    onClick={() => setShowingSchedules(null)}
+                                    className="text-gray-400 hover:text-gray-600"
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <ScheduleManager
+                                parkingId={showingSchedules.id!}
+                                parkingName={showingSchedules.location.district}
+                            />
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
