@@ -1,8 +1,7 @@
-// src/app/parking/components/StreetViewModal.tsx
+// src/app/parking/components/StreetViewModal.tsx (ACTUALIZADO)
 
 import React, { useEffect, useRef } from 'react';
-import { useJsApiLoader } from "@react-google-maps/api";
-import MapsCredential from "../../credentials/MapsCredential";
+import { useGoogleMaps, withGoogleMaps } from '../../shared/providers/GoogleMapsProvider';
 import type { Parking } from '../types/parking.types';
 
 interface StreetViewModalProps {
@@ -10,14 +9,10 @@ interface StreetViewModalProps {
     onClose: () => void;
 }
 
-const StreetViewModal: React.FC<StreetViewModalProps> = ({ parking, onClose }) => {
+const StreetViewModalComponent: React.FC<StreetViewModalProps> = ({ parking, onClose }) => {
     const streetViewRef = useRef<HTMLDivElement>(null);
     const panoramaRef = useRef<google.maps.StreetViewPanorama | null>(null);
-
-    const { isLoaded } = useJsApiLoader({
-        googleMapsApiKey: MapsCredential.mapsKey,
-        libraries: ["streetView"],
-    });
+    const { isLoaded } = useGoogleMaps();
 
     useEffect(() => {
         if (isLoaded && streetViewRef.current) {
@@ -134,20 +129,11 @@ const StreetViewModal: React.FC<StreetViewModalProps> = ({ parking, onClose }) =
 
                 {/* Street View Container */}
                 <div className="relative">
-                    {isLoaded ? (
-                        <div
-                            ref={streetViewRef}
-                            className="w-full h-[600px]"
-                            style={{ backgroundColor: '#f3f4f6' }}
-                        />
-                    ) : (
-                        <div className="w-full h-[600px] flex items-center justify-center bg-gray-100">
-                            <div className="text-center">
-                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                                <p className="text-gray-600">Cargando Street View...</p>
-                            </div>
-                        </div>
-                    )}
+                    <div
+                        ref={streetViewRef}
+                        className="w-full h-[600px]"
+                        style={{ backgroundColor: '#f3f4f6' }}
+                    />
 
                     {/* Info Panel */}
                     <div className="absolute top-4 left-4 bg-white bg-opacity-90 rounded-lg p-3 shadow-lg max-w-xs">
@@ -208,5 +194,8 @@ const StreetViewModal: React.FC<StreetViewModalProps> = ({ parking, onClose }) =
         </div>
     );
 };
+
+// Envolver el componente con el HOC withGoogleMaps
+const StreetViewModal = withGoogleMaps(StreetViewModalComponent);
 
 export default StreetViewModal;

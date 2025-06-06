@@ -1,6 +1,7 @@
-// src/app/parking/components/ParkingCard.tsx (ACTUALIZADA con imagen de Street View)
+// src/app/parking/components/ParkingCard.tsx (CORREGIDA)
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useGoogleMaps } from '../../shared/providers/GoogleMapsProvider';
 import type { Parking } from '../types/parking.types';
 import StreetViewModal from './StreetViewModal';
 import MapsCredential from '../../credentials/MapsCredential';
@@ -24,35 +25,13 @@ const ParkingCard: React.FC<ParkingCardProps> = ({
     isOwner = false,
     deleting = false
 }) => {
+    const { isLoaded } = useGoogleMaps();
     const [showActions, setShowActions] = useState(false);
+    const [imageUrl, setImageUrl] = useState<string>('');
+    const [imageLoaded, setImageLoaded] = useState(false);
     const [imageError, setImageError] = useState(false);
     const [showStreetView, setShowStreetView] = useState(false);
-    const [streetViewImageError, setStreetViewImageError] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
-
-    // 🆕 Generar URL de imagen de Street View usando Google Street View Static API
-    const getStreetViewImageUrl = () => {
-        const { latitude, longitude } = parking.location;
-        const size = '400x200';
-        const fov = '80'; // Field of view
-        const heading = '0'; // Dirección de la cámara
-        const pitch = '0'; // Ángulo de inclinación
-        
-        return `https://maps.googleapis.com/maps/api/streetview?size=${size}&location=${latitude},${longitude}&heading=${heading}&pitch=${pitch}&fov=${fov}&key=${MapsCredential.mapsKey}`;
-    };
-
-    // 🆕 Fallback a imagen de Google Maps Static API si Street View falla
-    const getMapImageUrl = () => {
-        const { latitude, longitude } = parking.location;
-        const zoom = '16';
-        const size = '400x200';
-        const maptype = 'roadmap';
-        
-        return `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=${zoom}&size=${size}&maptype=${maptype}&markers=color:blue%7C${latitude},${longitude}&key=${MapsCredential.mapsKey}`;
-    };
-
-    // 🆕 Placeholder final si todo falla
-    const placeholderImage = `https://via.placeholder.com/400x200/3B82F6/FFFFFF?text=Estacionamiento+${encodeURIComponent(parking.location.district)}`;
 
     // Cerrar dropdown cuando se hace clic fuera
     useEffect(() => {
@@ -67,6 +46,66 @@ const ParkingCard: React.FC<ParkingCardProps> = ({
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
+
+    // Cargar imagen de Street View cuando Google Maps esté listo
+    useEffect(() => {
+        if (isLoaded && !imageLoaded && !imageError) {
+            loadStreetViewImage();
+        }
+    }, [isLoaded, imageLoaded, imageError]);
+
+    const loadStreetViewImage = async () => {
+        try {
+            const streetViewService = new google.maps.StreetViewService();
+            const { latitude, longitude } = parking.location;
+
+            // Verificar disponibilidad de Street View
+            streetViewService.getPanorama({
+                location: { lat: latitude, lng: longitude },
+                radius: 100,
+            }, (result, status) => {
+                if (status === google.maps.StreetViewStatus.OK) {
+                    // Street View disponible - usar imagen estática
+                    const streetViewUrl = getStreetViewImageUrl();
+                    setImageUrl(streetViewUrl);
+                } else {
+                    // No hay Street View - usar mapa estático
+                    const mapUrl = getStaticMapImageUrl();
+                    setImageUrl(mapUrl);
+                }
+                setImageLoaded(true);
+            });
+        } catch (error) {
+            console.error('Error al cargar Street View:', error);
+            // Fallback a mapa estático
+            const mapUrl = getStaticMapImageUrl();
+            setImageUrl(mapUrl);
+            setImageLoaded(true);
+        }
+    };
+
+    const getStreetViewImageUrl = () => {
+        const { latitude, longitude } = parking.location;
+        const size = '400x200';
+        const fov = '80';
+        const heading = '0';
+        const pitch = '0';
+        
+        return `https://maps.googleapis.com/maps/api/streetview?size=${size}&location=${latitude},${longitude}&heading=${heading}&pitch=${pitch}&fov=${fov}&key=${MapsCredential.mapsKey}`;
+    };
+
+    const getStaticMapImageUrl = () => {
+        const { latitude, longitude } = parking.location;
+        const zoom = '16';
+        const size = '400x200';
+        const maptype = 'roadmap';
+        
+        return `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=${zoom}&size=${size}&maptype=${maptype}&markers=color:blue%7C${latitude},${longitude}&key=${MapsCredential.mapsKey}`;
+    };
+
+    const getPlaceholderImage = () => {
+        return `https://via.placeholder.com/400x200/3B82F6/FFFFFF?text=Estacionamiento+${encodeURIComponent(parking.location.district)}`;
+    };
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('es-ES', {
@@ -99,66 +138,29 @@ const ParkingCard: React.FC<ParkingCardProps> = ({
         setShowStreetView(true);
     };
 
-    // 🆕 Manejar errores de imagen en cascada
     const handleImageError = () => {
-        if (!streetViewImageError) {
-            setStreetViewImageError(true);
-        } else {
-            setImageError(true);
-        }
+        setImageError(true);
+        setImageUrl(getPlaceholderImage());
     };
-
-    // 🆕 Determinar qué imagen mostrar
-    const getImageToShow = () => {
-        if (imageError) {
-            return null; // Mostrar placeholder manual
-        }
-        if (streetViewImageError) {
-            return getMapImageUrl(); // Fallback a mapa estático
-        }
-        return getStreetViewImageUrl(); // Primera opción: Street View
-    };
-
-    const imageToShow = getImageToShow();
 
     return (
         <>
             <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200">
                 {/* Image Section */}
                 <div className="relative h-48 bg-gray-200">
-                    {imageToShow && !imageError ? (
+                    {imageLoaded ? (
                         <img
-                            src={imageToShow}
+                            src={imageUrl}
                             alt={`Vista de ${parking.location.district}`}
                             className="w-full h-full object-cover"
                             onError={handleImageError}
-                            onLoad={() => {
-                                // Reset error states cuando la imagen carga exitosamente
-                                if (streetViewImageError && imageToShow === getMapImageUrl()) {
-                                    console.log('✅ Fallback a mapa estático exitoso para:', parking.location.district);
-                                } else if (!streetViewImageError) {
-                                    console.log('✅ Street View imagen cargada para:', parking.location.district);
-                                }
-                            }}
+                            onLoad={() => console.log('✅ Imagen cargada para:', parking.location.district)}
                         />
                     ) : (
-                        // 🆕 Placeholder mejorado cuando fallan todas las imágenes
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-400 to-blue-600">
+                        // Loading placeholder
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-300 to-gray-400">
                             <div className="text-center text-white">
-                                <svg className="w-16 h-16 mx-auto mb-3 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
-                                <p className="text-sm font-medium opacity-90">Estacionamiento</p>
-                                <p className="text-xs opacity-75 mt-1">{parking.location.district}</p>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Loading overlay mientras se carga la primera imagen */}
-                    {!streetViewImageError && !imageError && (
-                        <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
-                            <div className="text-center text-gray-500">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
                                 <p className="text-xs">Cargando vista...</p>
                             </div>
                         </div>

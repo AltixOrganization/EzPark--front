@@ -1,6 +1,7 @@
 import "./App.css";
 import { Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./app/shared/context/AuthContext";
+import { GoogleMapsProvider } from "./app/shared/providers/GoogleMapsProvider";
 import GoogleMapComponent from "./app/public/pages/home/components/GoogleMapComponent.tsx";
 import Header from "./app/public/components/header.tsx";
 import LoginPage from "./app/auth/pages/LoginPage.tsx";
@@ -18,110 +19,112 @@ import MyParkingsPage from "./app/parking/pages/MyParkingsPage.tsx";
 function App() {
     return (
         <AuthProvider>
-            <div className="App min-h-screen bg-gray-50">
-                <Routes>
-                    {/* Rutas de autenticación sin header */}
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route path="/register" element={<RegisterPage />} />
+            <GoogleMapsProvider>
+                <div className="App min-h-screen bg-gray-50">
+                    <Routes>
+                        {/* Rutas de autenticación sin header */}
+                        <Route path="/login" element={<LoginPage />} />
+                        <Route path="/register" element={<RegisterPage />} />
 
-                    {/* Rutas con header */}
-                    
-                    <Route
-                        path="/estacionamientos"
-                        element={
-                            <>
-                                <Header />
-                                <AllParkingsPage />
-                            </>
-                        }
-                    />
-                    <Route
-                        path="/"
-                        element={
-                            <>
-                                <Header />
-                                <GoogleMapComponent />
-                            </>
-                        }
-                    />
-                    <Route
-                        path="/admin"
-                        element={
-                            <>
-                                <Header />
-                                <ProtectedAdminRoute>
-                                    <AdminPage />
-                                </ProtectedAdminRoute>
-                            </>
-                        }
-                    />
-                    <Route
-                        path="/profile"
-                        element={
-                            <>
-                                <Header />
-                                <ProtectedRoute>
-                                    <ProfilePage />
-                                </ProtectedRoute>
-                            </>
-                        }
-                    />
-                    
-                    {/* Rutas de estacionamientos - ACTUALIZADAS */}
-                    <Route
-                        path="/user-garages"
-                        element={
-                            <>
-                                <Header />
-                                <ProtectedRoute>
-                                    <MyParkingsPage />
-                                </ProtectedRoute>
-                            </>
-                        }
-                    />
-                    <Route
-                        path="/publish-garage"
-                        element={
-                            <>
-                                <Header />
-                                <ProtectedRoute>
-                                    <CreateParkingPage />
-                                </ProtectedRoute>
-                            </>
-                        }
-                    />
-                    
-                    {/* Otras rutas existentes */}
-                    <Route
-                        path="/my-reservations"
-                        element={
-                            <>
-                                <Header />
-                                <ProtectedRoute>
-                                    <div className="container mx-auto py-8 px-4">
-                                        <h1 className="text-2xl font-bold mb-6">Mis Reservas</h1>
-                                        <p className="text-gray-600">Aquí aparecerán tus reservas de estacionamiento.</p>
-                                    </div>
-                                </ProtectedRoute>
-                            </>
-                        }
-                    />
-                    <Route
-                        path="/parking-requests"
-                        element={
-                            <>
-                                <Header />
-                                <ProtectedRoute>
-                                    <div className="container mx-auto py-8 px-4">
-                                        <h1 className="text-2xl font-bold mb-6">Solicitudes de Estacionamiento</h1>
-                                        <p className="text-gray-600">Aquí aparecerán las solicitudes para tus espacios de estacionamiento.</p>
-                                    </div>
-                                </ProtectedRoute>
-                            </>
-                        }
-                    />
-                </Routes>
-            </div>
+                        {/* Rutas con header */}
+                        
+                        <Route
+                            path="/estacionamientos"
+                            element={
+                                <>
+                                    <Header />
+                                    <AllParkingsPage />
+                                </>
+                            }
+                        />
+                        <Route
+                            path="/"
+                            element={
+                                <>
+                                    <Header />
+                                    <GoogleMapComponent />
+                                </>
+                            }
+                        />
+                        <Route
+                            path="/admin"
+                            element={
+                                <>
+                                    <Header />
+                                    <ProtectedAdminRoute>
+                                        <AdminPage />
+                                    </ProtectedAdminRoute>
+                                </>
+                            }
+                        />
+                        <Route
+                            path="/profile"
+                            element={
+                                <>
+                                    <Header />
+                                    <ProtectedRoute>
+                                        <ProfilePage />
+                                    </ProtectedRoute>
+                                </>
+                            }
+                        />
+                        
+                        {/* Rutas de estacionamientos - ACTUALIZADAS */}
+                        <Route
+                            path="/user-garages"
+                            element={
+                                <>
+                                    <Header />
+                                    <ProtectedRoute>
+                                        <MyParkingsPage />
+                                    </ProtectedRoute>
+                                </>
+                            }
+                        />
+                        <Route
+                            path="/publish-garage"
+                            element={
+                                <>
+                                    <Header />
+                                    <ProtectedRoute>
+                                        <CreateParkingPage />
+                                    </ProtectedRoute>
+                                </>
+                            }
+                        />
+                        
+                        {/* Otras rutas existentes */}
+                        <Route
+                            path="/my-reservations"
+                            element={
+                                <>
+                                    <Header />
+                                    <ProtectedRoute>
+                                        <div className="container mx-auto py-8 px-4">
+                                            <h1 className="text-2xl font-bold mb-6">Mis Reservas</h1>
+                                            <p className="text-gray-600">Aquí aparecerán tus reservas de estacionamiento.</p>
+                                        </div>
+                                    </ProtectedRoute>
+                                </>
+                            }
+                        />
+                        <Route
+                            path="/parking-requests"
+                            element={
+                                <>
+                                    <Header />
+                                    <ProtectedRoute>
+                                        <div className="container mx-auto py-8 px-4">
+                                            <h1 className="text-2xl font-bold mb-6">Solicitudes de Estacionamiento</h1>
+                                            <p className="text-gray-600">Aquí aparecerán las solicitudes para tus espacios de estacionamiento.</p>
+                                        </div>
+                                    </ProtectedRoute>
+                                </>
+                            }
+                        />
+                    </Routes>
+                </div>
+            </GoogleMapsProvider>
         </AuthProvider>
     );
 }
