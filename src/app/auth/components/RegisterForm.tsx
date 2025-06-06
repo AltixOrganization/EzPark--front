@@ -20,7 +20,7 @@ const RegisterForm = () => {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        
+
         // Auto-capitalizar nombres mientras se escribe
         if (name === 'firstName' || name === 'lastName') {
             const capitalizedValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
@@ -111,10 +111,10 @@ const RegisterForm = () => {
             const success = await register(registrationData);
 
             if (success) {
-                navigate('/login', { 
-                    state: { 
-                        message: '¡Registro exitoso! Ahora puedes buscar Y ofrecer estacionamientos. Inicia sesión con tu email y contraseña.' 
-                    } 
+                navigate('/login', {
+                    state: {
+                        message: '¡Registro exitoso! Ahora puedes buscar Y ofrecer estacionamientos. Inicia sesión con tu email y contraseña.'
+                    }
                 });
             } else {
                 setError('El registro falló. Por favor intenta nuevamente.');
@@ -128,49 +128,62 @@ const RegisterForm = () => {
     };
 
     return (
-        <div className="min-h-screen flex flex-col bg-white">
-            {/* Header with logo */}
-            <div className="p-4 flex items-center">
-                <div className="flex items-center">
-                    <img src={carParkingLogo} alt="EzPark Logo" className="h-14 w-14" />
-                    <span className="ml-2 font-bold text-2xl">
-                        <span className="text-black">Ez</span>
-                        <span className="text-blue-600">Park</span>
-                    </span>
-                </div>
-            </div>
-            
-            {/* Línea gruesa */}
-            <div className="border-b-4 border-blue-600"></div>
-
-            {/* Main content area */}
-            <div className="flex flex-1 justify-center py-2">
-                <div className="flex max-w-6xl w-full scale-[1.25] origin-center transform-gpu">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+            <div className="w-full max-w-5xl bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div className="flex">
                     {/* Left side - Image */}
-                    <div className="w-1/2 flex items-center justify-end p-6 pr-8">
-                        <img 
-                             src={ezParkImage}  
-                            alt="EzPark" 
-                            className="max-w-md"
-                        />
+                    <div className="hidden lg:flex lg:w-2/5 bg-gradient-to-br from-blue-600 to-indigo-700 p-8 items-center justify-center relative overflow-hidden">
+                        <div className="absolute inset-0 bg-black opacity-10"></div>
+                        <div className="relative z-10 text-center text-white">
+                            <img
+                                src={ezParkImage} 
+                                alt="EzPark"
+                                className="w-72 h-auto mx-auto mb-6 drop-shadow-lg"
+                            />
+                            <h2 className="text-2xl font-bold mb-2">¡Únete a EzPark!</h2>
+                            <p className="text-blue-100">Busca Y ofrece estacionamientos</p>
+                        </div>
+                        {/* Decorative elements */}
+                        <div className="absolute top-10 right-10 w-20 h-20 bg-white bg-opacity-10 rounded-full"></div>
+                        <div className="absolute bottom-10 left-10 w-16 h-16 bg-white bg-opacity-10 rounded-full"></div>
                     </div>
 
                     {/* Right side - Form */}
-                    <div className="w-1/2 flex flex-col justify-center p-6 pl-8">
-                        <h2 className="text-xl font-semibold text-gray-800 mb-1">Crear cuenta nueva</h2>
-                        <p className="text-sm text-gray-600 mb-4">
-                            Únete a EzPark y disfruta de buscar Y ofrecer estacionamientos
-                        </p>
+                    <div className="w-full lg:w-3/5 p-8">
+                        {/* Logo for mobile */}
+                        <div className="lg:hidden flex items-center justify-center mb-6">
+                            <img src={carParkingLogo} alt="EzPark Logo" className="h-10 w-10" />
+                            <span className="ml-3 font-bold text-xl">
+                                <span className="text-black">Ez</span>
+                                <span className="text-blue-600">Park</span>
+                            </span>
+                        </div>
 
+                        {/* Header */}
+                        <div className="mb-6">
+                            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Crear cuenta nueva</h1>
+                            <p className="text-sm lg:text-base text-gray-600">
+                                Únete a EzPark y disfruta de buscar Y ofrecer estacionamientos
+                            </p>
+                        </div>
+
+                        {/* Error Message */}
                         {error && (
-                            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded text-sm whitespace-pre-line">
-                                {error}
+                            <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-md">
+                                <div className="flex">
+                                    <svg className="w-5 h-5 text-red-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                    </svg>
+                                    <p className="ml-3 text-sm text-red-700 whitespace-pre-line">{error}</p>
+                                </div>
                             </div>
                         )}
 
-                        <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
+                        {/* Form */}
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            {/* Email */}
                             <div>
-                                <label htmlFor="email" className="block text-sm text-gray-700 mb-1">
+                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                                     Email
                                 </label>
                                 <input
@@ -179,17 +192,18 @@ const RegisterForm = () => {
                                     name="email"
                                     value={formData.email}
                                     onChange={handleChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                                     placeholder="tu@email.com"
                                     required
                                 />
                             </div>
 
+                            {/* Names */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label htmlFor="firstName" className="block text-sm text-gray-700 mb-1">
+                                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
                                         Nombres
-                                        <span className="text-xs text-gray-500 block">Solo letras, sin espacios</span>
+                                        <span className="text-xs text-gray-500 block">Solo letras</span>
                                     </label>
                                     <input
                                         type="text"
@@ -197,17 +211,15 @@ const RegisterForm = () => {
                                         name="firstName"
                                         value={formData.firstName}
                                         onChange={handleChange}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                                         placeholder="Juan"
-                                        pattern="^[A-Z][a-zA-Z]*$"
-                                        title="Solo letras, debe empezar con mayúscula"
                                         required
                                     />
                                 </div>
                                 <div>
-                                    <label htmlFor="lastName" className="block text-sm text-gray-700 mb-1">
+                                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
                                         Apellidos
-                                        <span className="text-xs text-gray-500 block">Solo letras, sin espacios</span>
+                                        <span className="text-xs text-gray-500 block">Solo letras</span>
                                     </label>
                                     <input
                                         type="text"
@@ -215,17 +227,16 @@ const RegisterForm = () => {
                                         name="lastName"
                                         value={formData.lastName}
                                         onChange={handleChange}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                                         placeholder="Perez"
-                                        pattern="^[A-Z][a-zA-Z]*$"
-                                        title="Solo letras, debe empezar con mayúscula"
                                         required
                                     />
                                 </div>
                             </div>
 
+                            {/* Birth Date */}
                             <div>
-                                <label htmlFor="birthDate" className="block text-sm text-gray-700 mb-1">
+                                <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700 mb-1">
                                     Fecha de nacimiento
                                 </label>
                                 <input
@@ -234,17 +245,18 @@ const RegisterForm = () => {
                                     name="birthDate"
                                     value={formData.birthDate}
                                     onChange={handleChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                                     max={new Date().toISOString().split('T')[0]}
                                     required
                                 />
                             </div>
 
+                            {/* Passwords */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label htmlFor="password" className="block text-sm text-gray-700 mb-1">
+                                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                                         Contraseña
-                                        <span className="text-xs text-gray-500 block">8-30 caracteres, mayúscula, minúscula y número</span>
+                                        <span className="text-xs text-gray-500 block">8-30 chars, 1 mayús, 1 minús, 1 número</span>
                                     </label>
                                     <input
                                         type="password"
@@ -252,15 +264,15 @@ const RegisterForm = () => {
                                         name="password"
                                         value={formData.password}
                                         onChange={handleChange}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded"
-                                        minLength={8}
-                                        maxLength={30}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                                         required
                                     />
                                 </div>
                                 <div>
-                                    <label htmlFor="confirmPassword" className="block text-sm text-gray-700 mb-1">
+                                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
                                         Repetir contraseña
+                                        <span className="text-xs text-gray-500 block">Debe ser la misma</span>
+                                    
                                     </label>
                                     <input
                                         type="password"
@@ -268,9 +280,7 @@ const RegisterForm = () => {
                                         name="confirmPassword"
                                         value={formData.confirmPassword}
                                         onChange={handleChange}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded"
-                                        minLength={8}
-                                        maxLength={30}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                                         required
                                     />
                                 </div>
@@ -279,15 +289,29 @@ const RegisterForm = () => {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-200 disabled:opacity-50"
+                                className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200 font-medium mt-6"
                             >
-                                {isLoading ? 'Creando cuenta...' : 'Crear cuenta nueva'}
+                                {isLoading ? (
+                                    <div className="flex items-center justify-center">
+                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Creando cuenta...
+                                    </div>
+                                ) : (
+                                    'Crear cuenta nueva'
+                                )}
                             </button>
                         </form>
 
-                        <div className="mt-4 text-center max-w-md">
-                            <p className="text-sm">
-                                ¿Ya tienes una cuenta? <Link to="/login" className="text-blue-600 hover:underline">Iniciar sesión</Link>
+                        {/* Footer */}
+                        <div className="mt-6 text-center">
+                            <p className="text-sm text-gray-600">
+                                ¿Ya tienes una cuenta?{' '}
+                                <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500 transition duration-200">
+                                    Iniciar sesión
+                                </Link>
                             </p>
                         </div>
                     </div>
