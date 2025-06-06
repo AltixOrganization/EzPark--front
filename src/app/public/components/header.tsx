@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../shared/hooks/useAuth';
 import AuthService from '../../auth/services/authService';
 import carParkingLogo from '../../../assets/images/ezpark-logo.png';

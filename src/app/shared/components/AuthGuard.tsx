@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { hasAnyRole } from '../hooks/authHelpers';
 
