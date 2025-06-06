@@ -68,7 +68,7 @@ const MyParkingsPage: React.FC = () => {
         setShowDeleteModal(false);
         setDeletingParkingData(null);
     };
-
+    {/*
     const closeAllModals = () => {
         setEditingParking(null);
         setShowDeleteModal(false);
@@ -78,7 +78,7 @@ const MyParkingsPage: React.FC = () => {
 
     const handleManageSchedules = (parking: Parking) => {
         setShowingSchedules(parking);
-    };
+    };*/}
 
 
     // Filtrar y ordenar estacionamientos

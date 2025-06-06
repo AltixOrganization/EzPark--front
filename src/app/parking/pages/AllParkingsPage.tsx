@@ -13,7 +13,7 @@ const AllParkingsPage: React.FC = () => {
         loading, 
         error, 
         loadAllParkings,
-        searchNearbyParkings 
+        //searchNearbyParkings 
     } = useParking();
 
     // Estados para filtros y búsqueda
