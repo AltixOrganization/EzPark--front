@@ -16,7 +16,7 @@ const ScheduleManager: React.FC<ScheduleManagerProps> = ({
     parkingName = "este estacionamiento"
 }) => {
     const {
-        schedules,
+        //schedules,
         loading,
         creating,
         error,

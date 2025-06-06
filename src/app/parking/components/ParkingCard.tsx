@@ -63,7 +63,7 @@ const ParkingCard: React.FC<ParkingCardProps> = ({
             streetViewService.getPanorama({
                 location: { lat: latitude, lng: longitude },
                 radius: 100,
-            }, (result, status) => {
+            }, (_, status) => {
                 if (status === google.maps.StreetViewStatus.OK) {
                     // Street View disponible - usar imagen estática
                     const streetViewUrl = getStreetViewImageUrl();

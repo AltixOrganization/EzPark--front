@@ -110,11 +110,11 @@ const ProfilePage: React.FC = () => {
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <h1 className="text-2xl font-bold text-gray-900">
-                                            {profile.firstName} {profile.lastName}
+                                            {profile?.firstName} {profile?.lastName}
                                         </h1>
                                         <p className="text-gray-600">{user?.email}</p>
                                         <p className="text-sm text-gray-500">
-                                            {calculateAge(profile.birthDate)} años
+                                            {profile?.birthDate ? `${calculateAge(profile.birthDate)} años` : ''}
                                         </p>
                                     </div>
                                     
@@ -147,7 +147,7 @@ const ProfilePage: React.FC = () => {
                         <div className="space-y-4">
                             <div>
                                 <label className="text-sm font-medium text-gray-500">Nombre completo</label>
-                                <p className="text-gray-900">{profile.firstName} {profile.lastName}</p>
+                                <p className="text-gray-900">{profile?.firstName} {profile?.lastName}</p>
                             </div>
                             
                             <div>
@@ -157,12 +157,12 @@ const ProfilePage: React.FC = () => {
                             
                             <div>
                                 <label className="text-sm font-medium text-gray-500">Fecha de nacimiento</label>
-                                <p className="text-gray-900">{formatDate(profile.birthDate)}</p>
+                                <p className="text-gray-900">{profile?.birthDate ? formatDate(profile.birthDate) : ''}</p>
                             </div>
                             
                             <div>
                                 <label className="text-sm font-medium text-gray-500">Edad</label>
-                                <p className="text-gray-900">{calculateAge(profile.birthDate)} años</p>
+                                <p className="text-gray-900">{profile?.birthDate ? `${calculateAge(profile.birthDate)} años` : ''}</p>
                             </div>
                         </div>
                     </div>
@@ -184,12 +184,12 @@ const ProfilePage: React.FC = () => {
                             
                             <div>
                                 <label className="text-sm font-medium text-gray-500">Miembro desde</label>
-                                <p className="text-gray-900">{formatDate(profile.createdAt)}</p>
+                                <p className="text-gray-900">{profile?.createdAt ? formatDate(profile.createdAt) : ''}</p>
                             </div>
                             
                             <div>
                                 <label className="text-sm font-medium text-gray-500">Última actualización</label>
-                                <p className="text-gray-900">{formatDate(profile.updatedAt)}</p>
+                                <p className="text-gray-900">{profile?.updatedAt ? formatDate(profile.updatedAt) : ''}</p>
                             </div>
                             
                             <div>
@@ -232,7 +232,7 @@ const ProfilePage: React.FC = () => {
             </div>
 
             {/* Modal de edición */}
-            {isEditModalOpen && (
+            {isEditModalOpen && profile && (
                 <EditProfileModal
                     profile={profile}
                     onClose={() => setIsEditModalOpen(false)}

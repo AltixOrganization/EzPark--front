@@ -11,7 +11,6 @@ interface AddScheduleFormProps {
 }
 
 const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
-    parkingId,
     onSubmit,
     onCancel,
     loading = false
