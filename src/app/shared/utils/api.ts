@@ -1,5 +1,5 @@
 // Cambia la URL base - Swagger UI no es tu API
-const API_BASE_URL = 'https://ezpark-web-service.onrender.com'; // ❌ Era: 'http://localhost:8080/swagger-ui/index.html'
+const API_BASE_URL = 'http://localhost:8080'; // ❌ Era: 'http://localhost:8080/swagger-ui/index.html'
 
 export class ApiService {
     private static instance: ApiService;
@@ -47,12 +47,15 @@ export class ApiService {
                 status: response.status,
                 statusText: response.statusText,
                 ok: response.ok
-            });
-
-            if (!response.ok) {
+            });            if (!response.ok) {
                 let errorData;
                 try {
-                    errorData = await response.json();
+                    const responseText = await response.text();
+                    if (responseText) {
+                        errorData = JSON.parse(responseText);
+                    } else {
+                        errorData = { message: `Error ${response.status}: ${response.statusText}` };
+                    }
                     console.error(`❌ Error data from ${endpoint}:`, errorData);
                 } catch (parseError) {
                     console.error(`❌ Error parsing response from ${endpoint}:`, parseError);
@@ -71,9 +74,14 @@ export class ApiService {
                 }
 
                 throw new Error(errorMessage);
+            }            // Check if response has content before parsing JSON
+            const responseText = await response.text();
+            if (!responseText) {
+                console.log(`✅ Empty response from ${endpoint}`);
+                return [] as T; // Return empty array for empty responses
             }
 
-            const responseData = await response.json();
+            const responseData = JSON.parse(responseText);
             console.log(`✅ Success response from ${endpoint}:`, responseData);
             return responseData;
 

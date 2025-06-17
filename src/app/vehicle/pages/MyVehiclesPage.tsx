@@ -1,0 +1,156 @@
+// src/app/vehicle/pages/MyVehiclesPage.tsx
+
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '../../shared/hooks/useAuth';
+import { useVehicle } from '../hooks/useVehicle';
+import LoadingSpinner from '../../shared/components/LoadingSpinner';
+import VehicleList from '../components/VehicleList';
+import VehicleModal from '../components/VehicleModal';
+import DeleteVehicleModal from '../components/DeleteVehicleModal';
+import type { Vehicle } from '../types/vehicle.types';
+
+const MyVehiclesPage: React.FC = () => {
+    const { user } = useAuth();
+    const { 
+        vehicles, 
+        loading, 
+        error, 
+        loadVehiclesByUser, 
+        deleteVehicle 
+    } = useVehicle();
+
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
+    const [deletingVehicle, setDeletingVehicle] = useState<Vehicle | null>(null);
+    const [deleteLoading, setDeleteLoading] = useState(false);
+
+    useEffect(() => {
+        if (user?.id) {
+            loadVehiclesByUser(user.id);
+        }
+    }, [user?.id, loadVehiclesByUser]);
+
+    const handleEdit = (vehicle: Vehicle) => {
+        setEditingVehicle(vehicle);
+    };
+
+    const handleDelete = (vehicleId: number) => {
+        const vehicle = vehicles.find(v => v.id === vehicleId);
+        if (vehicle) {
+            setDeletingVehicle(vehicle);
+        }
+    };
+
+    const confirmDelete = async () => {
+        if (!deletingVehicle) return;
+
+        try {
+            setDeleteLoading(true);
+            await deleteVehicle(deletingVehicle.id);
+            setDeletingVehicle(null);
+        } catch (err) {
+            console.error('Error al eliminar vehículo:', err);
+        } finally {
+            setDeleteLoading(false);
+        }
+    };
+
+    const handleVehicleSubmit = () => {
+        if (user?.id) {
+            loadVehiclesByUser(user.id);
+        }
+        setEditingVehicle(null);
+        setShowAddModal(false);
+    };
+
+    if (loading) {
+        return <LoadingSpinner />;
+    }
+
+    return (
+        <div className="container mx-auto px-4 py-8">
+            <div className="flex justify-between items-center mb-8">
+                <div>
+                    <h1 className="text-3xl font-bold text-gray-900">Mis Vehículos</h1>
+                    <p className="text-gray-600 mt-2">
+                        Gestiona tus vehículos registrados para hacer reservas de estacionamiento
+                    </p>
+                </div>
+                <button
+                    onClick={() => setShowAddModal(true)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+                >
+                    <svg 
+                        className="w-5 h-5 mr-2" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                    >
+                        <path 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            strokeWidth={2} 
+                            d="M12 4v16m8-8H4" 
+                        />
+                    </svg>
+                    Agregar Vehículo
+                </button>
+            </div>
+
+            {/* Mensaje informativo temporal */}
+            <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="flex items-center">
+                    <svg className="w-5 h-5 text-yellow-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    <div>
+                        <h3 className="text-sm font-medium text-yellow-800">Versión Simplificada</h3>
+                        <p className="text-sm text-yellow-700 mt-1">
+                            Actualmente usando entrada manual para marca y modelo debido a limitaciones en el backend.
+                            Los vehículos se crean con un ID de modelo temporal.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {error && (
+                <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                    {error}
+                </div>
+            )}
+
+            <VehicleList
+                vehicles={vehicles}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                showActions={true}
+            />
+
+            {/* Modal para agregar vehículo */}
+            <VehicleModal
+                isOpen={showAddModal}
+                onClose={() => setShowAddModal(false)}
+                onSubmit={handleVehicleSubmit}
+            />
+
+            {/* Modal para editar vehículo */}
+            <VehicleModal
+                isOpen={!!editingVehicle}
+                vehicle={editingVehicle}
+                onClose={() => setEditingVehicle(null)}
+                onSubmit={handleVehicleSubmit}
+            />
+
+            {/* Modal para eliminar vehículo */}
+            <DeleteVehicleModal
+                isOpen={!!deletingVehicle}
+                vehicle={deletingVehicle}
+                onConfirm={confirmDelete}
+                onCancel={() => setDeletingVehicle(null)}
+                loading={deleteLoading}
+            />
+        </div>
+    );
+};
+
+export default MyVehiclesPage;
