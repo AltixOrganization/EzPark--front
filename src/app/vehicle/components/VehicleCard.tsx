@@ -14,8 +14,35 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
     vehicle, 
     onEdit, 
     onDelete, 
-    showActions = true 
+    showActions = true
 }) => {
+    // Obtener información de marca y modelo directamente del backend
+    const getBrandName = () => {
+        // Estructura del backend: vehicle.brand.name
+        if (vehicle.brand?.name) {
+            return vehicle.brand.name;
+        }
+        // Fallback a estructura anterior
+        if (vehicle.model?.brand?.name) {
+            return vehicle.model.brand.name;
+        }
+        return 'N/A';
+    };
+
+    const getModelName = () => {
+        // Estructura del backend: vehicle.brand.model.name
+        if (vehicle.brand?.model?.name) {
+            return vehicle.brand.model.name;
+        }
+        // Fallback a estructura anterior
+        if (vehicle.model?.name) {
+            return vehicle.model.name;
+        }
+        return 'N/A';
+    };
+
+    const brandName = getBrandName();
+    const modelName = getModelName();
     return (
         <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow">
             <div className="flex items-start justify-between">
@@ -27,17 +54,12 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
                     <div className="space-y-2">
                         <div className="flex items-center text-sm text-gray-600">
                             <span className="font-medium mr-2">Marca:</span>
-                            <span>{vehicle.model?.brand?.name || 'No especificada'}</span>
+                            <span>{brandName}</span>
                         </div>
                         
                         <div className="flex items-center text-sm text-gray-600">
                             <span className="font-medium mr-2">Modelo:</span>
-                            <span>{vehicle.model?.name || 'No especificado'}</span>
-                        </div>
-                        
-                        <div className="flex items-center text-sm text-gray-600">
-                            <span className="font-medium mr-2">ID del Modelo:</span>
-                            <span>#{vehicle.modelId}</span>
+                            <span>{modelName}</span>
                         </div>
                     </div>
                 </div>

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useVehicle } from '../hooks/useVehicle';
 import { useAuth } from '../../shared/hooks/useAuth';
 import LoadingSpinner from '../../shared/components/LoadingSpinner';
-import type { Vehicle, CreateVehicleRequest, UpdateVehicleRequest } from '../types/vehicle.types';
+import type { Vehicle, CreateVehicleRequest, UpdateVehicleRequest, Model } from '../types/vehicle.types';
 
 interface VehicleFormProps {
     vehicle?: Vehicle | null;
@@ -15,6 +15,7 @@ interface VehicleFormProps {
 const VehicleForm: React.FC<VehicleFormProps> = ({ vehicle, onSubmit, onCancel }) => {
     const { user } = useAuth();
     const { 
+        brands,
         loading, 
         error, 
         loadAllBrands, 
@@ -26,12 +27,11 @@ const VehicleForm: React.FC<VehicleFormProps> = ({ vehicle, onSubmit, onCancel }
         licensePlate: '',
         modelId: 0,
         profileId: user?.id || 0,
-        // Temporary fields for manual input
-        brandName: '',
-        modelName: ''
+        selectedBrandId: 0
     });
 
     const [formLoading, setFormLoading] = useState(false);
+    const [availableModels, setAvailableModels] = useState<Model[]>([]);
 
     useEffect(() => {
         loadAllBrands();
@@ -39,15 +39,48 @@ const VehicleForm: React.FC<VehicleFormProps> = ({ vehicle, onSubmit, onCancel }
 
     useEffect(() => {
         if (vehicle) {
+            // Buscar la marca del vehículo existente
+            const vehicleBrand = brands.find(brand => 
+                brand.models?.some(model => model.id === vehicle.modelId)
+            );
+            
             setFormData({
                 licensePlate: vehicle.licensePlate,
                 modelId: vehicle.modelId,
                 profileId: vehicle.profileId,
-                brandName: vehicle.model?.brand?.name || '',
-                modelName: vehicle.model?.name || ''
+                selectedBrandId: vehicleBrand?.id || 0
             });
+            
+            // Configurar modelos disponibles para la marca del vehículo
+            if (vehicleBrand?.models) {
+                setAvailableModels(vehicleBrand.models);
+            }
         }
-    }, [vehicle]);
+    }, [vehicle, brands]);
+
+    // Actualizar modelos disponibles cuando cambia la marca seleccionada
+    useEffect(() => {
+        if (formData.selectedBrandId > 0) {
+            const selectedBrand = brands.find(brand => brand.id === formData.selectedBrandId);
+            setAvailableModels(selectedBrand?.models || []);
+            
+            // Resetear modelo seleccionado si no es edición
+            if (!vehicle) {
+                setFormData(prev => ({ ...prev, modelId: 0 }));
+            }
+        } else {
+            setAvailableModels([]);
+            setFormData(prev => ({ ...prev, modelId: 0 }));
+        }
+    }, [formData.selectedBrandId, brands, vehicle]);
+
+    const handleBrandChange = (brandId: number) => {
+        setFormData(prev => ({ 
+            ...prev, 
+            selectedBrandId: brandId,
+            modelId: 0 // Resetear modelo cuando cambia la marca
+        }));
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -57,35 +90,31 @@ const VehicleForm: React.FC<VehicleFormProps> = ({ vehicle, onSubmit, onCancel }
             return;
         }
         
-        if (!formData.brandName.trim()) {
-            alert('Por favor ingresa la marca del vehículo');
+        if (formData.selectedBrandId === 0) {
+            alert('Por favor selecciona una marca');
             return;
         }
         
-        if (!formData.modelName.trim()) {
-            alert('Por favor ingresa el modelo del vehículo');
+        if (formData.modelId === 0) {
+            alert('Por favor selecciona un modelo');
             return;
         }
 
         try {
             setFormLoading(true);
             
-            // For now, create a temporary model with modelId = 1
-            // This should be replaced when your backend has proper model endpoints
-            const tempModelId = 1;
-            
             if (vehicle) {
                 // Actualizar vehículo existente
                 const updateData: UpdateVehicleRequest = {
                     licensePlate: formData.licensePlate,
-                    modelId: tempModelId
+                    modelId: formData.modelId
                 };
                 await updateVehicle(vehicle.id, updateData);
             } else {
                 // Crear nuevo vehículo
                 const createData: CreateVehicleRequest = {
                     licensePlate: formData.licensePlate,
-                    modelId: tempModelId,
+                    modelId: formData.modelId,
                     profileId: formData.profileId
                 };
                 await createVehicle(createData);
@@ -134,33 +163,56 @@ const VehicleForm: React.FC<VehicleFormProps> = ({ vehicle, onSubmit, onCancel }
                 </div>
 
                 <div>
-                    <label htmlFor="brandName" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="brand" className="block text-sm font-medium text-gray-700 mb-1">
                         Marca del Vehículo *
                     </label>
-                    <input
-                        type="text"
-                        id="brandName"
-                        value={formData.brandName}
-                        onChange={(e) => setFormData(prev => ({ ...prev, brandName: e.target.value }))}
+                    <select
+                        id="brand"
+                        value={formData.selectedBrandId}
+                        onChange={(e) => handleBrandChange(Number(e.target.value))}
                         className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Ej: Toyota, Honda, Hyundai"
                         required
-                    />
+                    >
+                        <option value={0}>Selecciona una marca</option>
+                        {brands.map(brand => (
+                            <option key={brand.id} value={brand.id}>
+                                {brand.name}
+                            </option>
+                        ))}
+                    </select>
+                    {brands.length === 0 && (
+                        <p className="text-sm text-gray-500 mt-1">
+                            No hay marcas disponibles. Contacta al administrador.
+                        </p>
+                    )}
                 </div>
 
                 <div>
-                    <label htmlFor="modelName" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="model" className="block text-sm font-medium text-gray-700 mb-1">
                         Modelo del Vehículo *
                     </label>
-                    <input
-                        type="text"
-                        id="modelName"
-                        value={formData.modelName}
-                        onChange={(e) => setFormData(prev => ({ ...prev, modelName: e.target.value }))}
+                    <select
+                        id="model"
+                        value={formData.modelId}
+                        onChange={(e) => setFormData(prev => ({ ...prev, modelId: Number(e.target.value) }))}
                         className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Ej: Corolla, Civic, Elantra"
+                        disabled={formData.selectedBrandId === 0}
                         required
-                    />
+                    >
+                        <option value={0}>
+                            {formData.selectedBrandId === 0 ? 'Primero selecciona una marca' : 'Selecciona un modelo'}
+                        </option>
+                        {availableModels.map(model => (
+                            <option key={model.id} value={model.id}>
+                                {model.name}
+                            </option>
+                        ))}
+                    </select>
+                    {formData.selectedBrandId > 0 && availableModels.length === 0 && (
+                        <p className="text-sm text-yellow-600 mt-1">
+                            Esta marca no tiene modelos disponibles. Contacta al administrador.
+                        </p>
+                    )}
                 </div>
 
                 <div className="flex justify-end space-x-3 pt-4">

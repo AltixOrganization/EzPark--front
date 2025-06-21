@@ -37,6 +37,45 @@ const BrandModelManager: React.FC = () => {
         loadAllBrands();
     }, [loadAllBrands]);
 
+// src/app/vehicle/components/BrandModelManager.tsx
+
+import React, { useEffect, useState } from 'react';
+import { useVehicle } from '../hooks/useVehicle';
+import LoadingSpinner from '../../shared/components/LoadingSpinner';
+import type { CreateBrandRequest, CreateModelRequest } from '../types/vehicle.types';
+
+const BrandModelManager: React.FC = () => {
+    const { 
+        brands, 
+        loading, 
+        error, 
+        loadAllBrands, 
+        createBrand, 
+        createModel,
+        deleteBrand,
+        deleteModel
+    } = useVehicle();
+
+    const [showBrandForm, setShowBrandForm] = useState(false);
+    const [showModelForm, setShowModelForm] = useState(false);
+    const [selectedBrandForModel, setSelectedBrandForModel] = useState(0);
+    const [expandedBrands, setExpandedBrands] = useState<Set<number>>(new Set());
+
+    const [brandForm, setBrandForm] = useState<CreateBrandRequest>({
+        name: '',
+        description: ''
+    });
+
+    const [modelForm, setModelForm] = useState<CreateModelRequest>({
+        brandId: 0,
+        name: '',
+        description: ''
+    });
+
+    useEffect(() => {
+        loadAllBrands();
+    }, [loadAllBrands]);
+
     const toggleBrandExpansion = (brandId: number) => {
         const newExpanded = new Set(expandedBrands);
         if (newExpanded.has(brandId)) {
@@ -307,6 +346,9 @@ const BrandModelManager: React.FC = () => {
             )}
         </div>
     );
+};
+
+export default BrandModelManager;
 };
 
 export default BrandModelManager;

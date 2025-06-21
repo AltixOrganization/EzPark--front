@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../shared/utils/api';
 import LoadingSpinner from '../../shared/components/LoadingSpinner';
+import BrandModelManager from '../../vehicle/components/BrandModelManager';
 
 interface User {
     id: number;
@@ -22,16 +23,15 @@ const AdminPanel: React.FC = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [profiles, setProfiles] = useState<Profile[]>([]);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
-    const [activeTab, setActiveTab] = useState<'users' | 'profiles'>('users');
+    const [activeTab, setActiveTab] = useState<'users' | 'profiles' | 'vehicles'>('users');
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string>('');
-
-    useEffect(() => {
+    const [error, setError] = useState<string>('');    useEffect(() => {
         if (activeTab === 'users') {
             fetchUsers();
-        } else {
+        } else if (activeTab === 'profiles') {
             fetchProfiles();
         }
+        // Para 'vehicles', no necesitamos fetch aquí ya que BrandModelManager maneja sus propios datos
     }, [activeTab]);
 
     const fetchUsers = async () => {
@@ -40,13 +40,13 @@ const AdminPanel: React.FC = () => {
             setError('');
             // Tu backend: GET /api/v1/users (requiere ROLE_ADMIN)
             const usersData = await apiService.get<User[]>('/api/v1/users');
-            setUsers(usersData);
-        } catch (err: any) {
+            setUsers(usersData);        } catch (err: unknown) {
             console.error('Error al cargar usuarios:', err);
-            if (err.message.includes('403') || err.message.includes('Forbidden')) {
+            const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+            if (errorMessage.includes('403') || errorMessage.includes('Forbidden')) {
                 setError('No tienes permisos para ver esta información. Solo administradores pueden acceder.');
             } else {
-                setError('Error al cargar usuarios: ' + err.message);
+                setError('Error al cargar usuarios: ' + errorMessage);
             }
         } finally {
             setLoading(false);
@@ -59,10 +59,10 @@ const AdminPanel: React.FC = () => {
             setError('');
             // Tu backend: GET /profiles
             const profilesData = await apiService.get<Profile[]>('/profiles');
-            setProfiles(profilesData);
-        } catch (err: any) {
+            setProfiles(profilesData);        } catch (err: unknown) {
             console.error('Error al cargar perfiles:', err);
-            setError('Error al cargar perfiles: ' + err.message);
+            const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+            setError('Error al cargar perfiles: ' + errorMessage);
         } finally {
             setLoading(false);
         }
@@ -72,10 +72,10 @@ const AdminPanel: React.FC = () => {
         try {
             // Tu backend: GET /api/v1/users/{userId}
             const user = await apiService.get<User>(`/api/v1/users/${userId}`);
-            setSelectedUser(user);
-        } catch (err: any) {
+            setSelectedUser(user);        } catch (err: unknown) {
             console.error('Error al cargar detalles del usuario:', err);
-            setError('Error al cargar detalles del usuario: ' + err.message);
+            const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+            setError('Error al cargar detalles del usuario: ' + errorMessage);
         }
     };
 
@@ -106,11 +106,10 @@ const AdminPanel: React.FC = () => {
 
     return (
         <div className="container mx-auto py-8 px-4">
-            <div className="max-w-7xl mx-auto">
-                {/* Header */}
+            <div className="max-w-7xl mx-auto">                {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">Panel de Administración</h1>
-                    <p className="text-gray-600">Gestiona usuarios y perfiles del sistema</p>
+                    <p className="text-gray-600">Gestiona usuarios, perfiles y catálogo de vehículos del sistema</p>
                 </div>
 
                 {/* Tabs */}
@@ -136,6 +135,16 @@ const AdminPanel: React.FC = () => {
                         >
                             Perfiles ({profiles.length})
                         </button>
+                        <button
+                            onClick={() => setActiveTab('vehicles')}
+                            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                                activeTab === 'vehicles'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            }`}
+                        >
+                            Marcas y Modelos
+                        </button>
                     </nav>
                 </div>
 
@@ -152,9 +161,7 @@ const AdminPanel: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                )}
-
-                {/* Content */}
+                )}                {/* Content */}
                 {activeTab === 'users' ? (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Lista de usuarios */}
@@ -243,8 +250,7 @@ const AdminPanel: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                    </div>
-                ) : (
+                    </div>                ) : activeTab === 'profiles' ? (
                     /* Lista de perfiles */
                     <div className="bg-white shadow rounded-lg">
                         <div className="px-4 py-5 sm:p-6">
@@ -274,6 +280,19 @@ const AdminPanel: React.FC = () => {
                                     </div>
                                 ))}
                             </div>
+                        </div>
+                    </div>
+                ) : (
+                    /* Gestión de marcas y modelos */
+                    <div className="bg-white shadow rounded-lg">
+                        <div className="px-4 py-5 sm:p-6">
+                            <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                                Gestión de Marcas y Modelos de Vehículos
+                            </h3>
+                            <p className="text-gray-600 mb-6">
+                                Administra el catálogo de marcas y modelos disponibles para los usuarios.
+                            </p>
+                            <BrandModelManager />
                         </div>
                     </div>
                 )}

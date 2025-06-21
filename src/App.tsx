@@ -13,6 +13,12 @@ import ProtectedAdminRoute from "./app/shared/components/ProtectedAdminRoute.tsx
 import AllParkingsPage from "./app/parking/pages/AllParkingsPage.tsx";
 import CreateParkingPage from "./app/parking/pages/CreateParkingPage.tsx";
 import MyParkingsPage from "./app/parking/pages/MyParkingsPage.tsx";
+import MyVehiclesPage from "./app/vehicle/pages/MyVehiclesPage.tsx";
+import AdminVehiclesPage from "./app/vehicle/pages/AdminVehiclesPage.tsx";
+import MyReservationsPage from "./app/reservation/pages/MyReservationsPage.tsx";
+import HostReservationsPage from "./app/reservation/pages/HostReservationsPage.tsx";
+import PaymentHistoryPage from "./app/payment/pages/PaymentHistoryPage.tsx";
+import ParkingSchedulePage from "./app/schedule/pages/ParkingSchedulePage.tsx";
 import { useAuth } from "./app/shared/hooks/useAuth";
 
 // Componente para manejar la redirección inicial
@@ -100,8 +106,7 @@ function App() {
                                 </ProtectedRoute>
                             }
                         />
-                        
-                        <Route
+                          <Route
                             path="/publish-garage"
                             element={
                                 <ProtectedRoute>
@@ -110,30 +115,67 @@ function App() {
                                 </ProtectedRoute>
                             }
                         />
-                        
-                        {/* Otras rutas protegidas */}
+
+                        {/* Ruta para gestionar horarios de un estacionamiento */}
                         <Route
-                            path="/my-reservations"
+                            path="/parking/:parkingId/schedules"
                             element={
                                 <ProtectedRoute>
                                     <Header />
-                                    <div className="container mx-auto py-8 px-4">
-                                        <h1 className="text-2xl font-bold mb-6">Mis Reservas</h1>
-                                        <p className="text-gray-600">Aquí aparecerán tus reservas de estacionamiento.</p>
-                                    </div>
+                                    <ParkingSchedulePage />
+                                </ProtectedRoute>
+                            }
+                        />
+                        
+                        {/* Rutas de vehículos */}
+                        <Route
+                            path="/my-vehicles"
+                            element={
+                                <ProtectedRoute>
+                                    <Header />
+                                    <MyVehiclesPage />
                                 </ProtectedRoute>
                             }
                         />
                         
                         <Route
+                            path="/admin/vehicles"
+                            element={
+                                <ProtectedRoute>
+                                    <Header />
+                                    <ProtectedAdminRoute>
+                                        <AdminVehiclesPage />
+                                    </ProtectedAdminRoute>
+                                </ProtectedRoute>
+                            }
+                        />
+
+                        {/* Otras rutas protegidas */}                        <Route
+                            path="/my-reservations"
+                            element={
+                                <ProtectedRoute>
+                                    <Header />
+                                    <MyReservationsPage />
+                                </ProtectedRoute>
+                            }
+                        />
+                          <Route
                             path="/parking-requests"
                             element={
                                 <ProtectedRoute>
                                     <Header />
-                                    <div className="container mx-auto py-8 px-4">
-                                        <h1 className="text-2xl font-bold mb-6">Solicitudes de Estacionamiento</h1>
-                                        <p className="text-gray-600">Aquí aparecerán las solicitudes para tus espacios de estacionamiento.</p>
-                                    </div>
+                                    <HostReservationsPage />
+                                </ProtectedRoute>
+                            }
+                        />
+
+                        {/* Ruta de historial de pagos */}
+                        <Route
+                            path="/payment-history"
+                            element={
+                                <ProtectedRoute>
+                                    <Header />
+                                    <PaymentHistoryPage />
                                 </ProtectedRoute>
                             }
                         />

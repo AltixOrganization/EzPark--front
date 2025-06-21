@@ -47,15 +47,12 @@ export class ApiService {
                 status: response.status,
                 statusText: response.statusText,
                 ok: response.ok
-            });            if (!response.ok) {
+            });
+
+            if (!response.ok) {
                 let errorData;
                 try {
-                    const responseText = await response.text();
-                    if (responseText) {
-                        errorData = JSON.parse(responseText);
-                    } else {
-                        errorData = { message: `Error ${response.status}: ${response.statusText}` };
-                    }
+                    errorData = await response.json();
                     console.error(`❌ Error data from ${endpoint}:`, errorData);
                 } catch (parseError) {
                     console.error(`❌ Error parsing response from ${endpoint}:`, parseError);
@@ -74,14 +71,9 @@ export class ApiService {
                 }
 
                 throw new Error(errorMessage);
-            }            // Check if response has content before parsing JSON
-            const responseText = await response.text();
-            if (!responseText) {
-                console.log(`✅ Empty response from ${endpoint}`);
-                return [] as T; // Return empty array for empty responses
             }
 
-            const responseData = JSON.parse(responseText);
+            const responseData = await response.json();
             console.log(`✅ Success response from ${endpoint}:`, responseData);
             return responseData;
 

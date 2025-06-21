@@ -28,9 +28,7 @@ const Header: React.FC = () => {
                             <span className="text-black">Ez</span>
                             <span className="text-blue-600">Park</span>
                         </span>
-                    </Link>
-
-                    {/* Secciones de navegación a la derecha */}
+                    </Link>                    {/* Secciones de navegación a la derecha */}
                     {isAuthenticated ? (
                         <nav className="flex items-center space-x-8">
                             <Link to="/home" className={`font-medium ${isActive('/home')}`}>
@@ -38,9 +36,14 @@ const Header: React.FC = () => {
                             </Link>
                             <Link to="/estacionamientos" className={`font-medium ${isActive('/estacionamientos')}`}>
                                 Buscar Estacionamiento
-                            </Link>
-                            <Link to="/my-reservations" className={`font-medium ${isActive('/my-reservations')}`}>
+                            </Link>                            <Link to="/my-reservations" className={`font-medium ${isActive('/my-reservations')}`}>
                                 Mis Reservas
+                            </Link>
+                            <Link to="/payment-history" className={`font-medium ${isActive('/payment-history')}`}>
+                                Pagos
+                            </Link>
+                            <Link to="/my-vehicles" className={`font-medium ${isActive('/my-vehicles')}`}>
+                                Mis Vehículos
                             </Link>
                             <Link to="/user-garages" className={`font-medium ${isActive('/user-garages')}`}>
                                 Garajes

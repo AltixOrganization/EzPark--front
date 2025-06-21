@@ -4,6 +4,7 @@ export interface Brand {
     id: number;
     name: string;
     description: string;
+    models?: Model[];
 }
 
 export interface Model {
@@ -19,6 +20,21 @@ export interface Vehicle {
     licensePlate: string;
     modelId: number;
     profileId: number;
+    createdAt?: string;
+    updatedAt?: string;
+    // Estructura según el backend
+    brand?: {
+        id: number;
+        name: string;
+        description: string;
+        model: {
+            id: number;
+            name: string;
+            description: string;
+            brandId: number;
+        };
+    };
+    // Para compatibilidad con el modelo anterior
     model?: Model;
 }
 
