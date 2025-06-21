@@ -18,6 +18,7 @@ import AdminVehiclesPage from "./app/vehicle/pages/AdminVehiclesPage.tsx";
 import MyReservationsPage from "./app/reservation/pages/MyReservationsPage.tsx";
 import HostReservationsPage from "./app/reservation/pages/HostReservationsPage.tsx";
 import PaymentHistoryPage from "./app/payment/pages/PaymentHistoryPage.tsx";
+import PaymentPage from "./app/payment/pages/PaymentPage.tsx";
 import ParkingSchedulePage from "./app/schedule/pages/ParkingSchedulePage.tsx";
 import { useAuth } from "./app/shared/hooks/useAuth";
 
@@ -165,6 +166,16 @@ function App() {
                                 <ProtectedRoute>
                                     <Header />
                                     <HostReservationsPage />
+                                </ProtectedRoute>
+                            }
+                        />
+
+                        {/* Ruta de pago para reservas */}
+                        <Route
+                            path="/payment"
+                            element={
+                                <ProtectedRoute>
+                                    <PaymentPage />
                                 </ProtectedRoute>
                             }
                         />

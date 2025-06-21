@@ -24,11 +24,16 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-10 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
-                <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-medium text-gray-900">
-                        Procesar Pago
-                    </h3>
+            <div className="relative top-10 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
+                <div className="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 className="text-lg font-medium text-gray-900">
+                            Procesar Pago
+                        </h3>
+                        <p className="text-sm text-gray-600 mt-1">
+                            Reserva #{reservation.id} - {reservation.parking?.space || 'Espacio de estacionamiento'}
+                        </p>
+                    </div>
                     <button
                         onClick={onClose}
                         disabled={loading}
@@ -41,10 +46,9 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 </div>
                 
                 <PaymentForm
-                    reservation={reservation}
                     onSubmit={onSubmit}
-                    onCancel={onClose}
                     loading={loading}
+                    reservationAmount={reservation.totalFare}
                 />
             </div>
         </div>

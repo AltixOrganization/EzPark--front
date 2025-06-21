@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { GoogleMap, Marker } from "@react-google-maps/api";
+import { useNavigate } from 'react-router-dom';
 import { useGoogleMaps } from "../../shared/providers/GoogleMapsProvider";
 import { useAuth } from "../../shared/hooks/useAuth";
 import { useReservation } from "../../reservation/hooks/useReservation";
@@ -34,18 +35,20 @@ const ParkingDetailsModal: React.FC<ParkingDetailsModalProps> = ({
     const { isLoaded, loadError } = useGoogleMaps();
     const { user } = useAuth();
     const { createReservation, loading: reservationLoading } = useReservation();
-      const [showReservationForm, setShowReservationForm] = useState(false);
-    const [reservationSuccess, setReservationSuccess] = useState(false);    const handleReservationSubmit = async (formData: ReservationFormData) => {
+    const navigate = useNavigate();    const [showReservationForm, setShowReservationForm] = useState(false);
+    
+    const handleReservationSubmit = async (formData: ReservationFormData) => {
         try {
-            await createReservation(formData, parking);
-            setReservationSuccess(true);
-            setShowReservationForm(false);
+            const newReservation = await createReservation(formData, parking);
             
-            // Mostrar mensaje de éxito por 3 segundos
-            setTimeout(() => {
-                setReservationSuccess(false);
-                onClose(); // Cerrar el modal después del éxito
-            }, 3000);
+            // Guardar la reserva en localStorage para la página de pago
+            localStorage.setItem('pendingReservation', JSON.stringify(newReservation));
+            
+            // Cerrar el modal
+            onClose();
+            
+            // Redirigir a la página de pagos
+            navigate('/payment');
         } catch (error) {
             console.error('Error creating reservation:', error);
             alert('Error al crear la reservación: ' + (error instanceof Error ? error.message : 'Error desconocido'));
@@ -125,7 +128,8 @@ const ParkingDetailsModal: React.FC<ParkingDetailsModalProps> = ({
                     <Marker position={mapCenter} />
                 </GoogleMap>
             </div>
-        );    };
+        );
+    };
 
     // Si se muestra el formulario de reservación
     if (showReservationForm) {
@@ -142,25 +146,30 @@ const ParkingDetailsModal: React.FC<ParkingDetailsModalProps> = ({
                 </div>
             </div>
         );
-    }
-
-    // Mensaje de éxito
-    if (reservationSuccess) {
+    }    // Mostrar formulario de reserva
+    if (showReservationForm) {
         return (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-8 text-center">
-                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
+                <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
+                    <div className="p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-semibold text-gray-900">Reservar Estacionamiento</h2>
+                            <button
+                                onClick={() => setShowReservationForm(false)}
+                                className="text-gray-400 hover:text-gray-600"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <ReservationForm
+                            parking={parking}
+                            onSubmit={handleReservationSubmit}
+                            onCancel={() => setShowReservationForm(false)}
+                        />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">¡Reservación Exitosa!</h3>
-                    <p className="text-gray-600 mb-4">
-                        Tu solicitud de reservación ha sido enviada al propietario del estacionamiento.
-                    </p>
-                    <p className="text-sm text-gray-500">
-                        Cerrando automáticamente...
-                    </p>
                 </div>
             </div>
         );

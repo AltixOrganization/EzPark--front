@@ -49,11 +49,17 @@ export class ApiService {
                 ok: response.ok
             });
 
-            if (!response.ok) {
-                let errorData;
+            if (!response.ok) {                let errorData;
                 try {
                     errorData = await response.json();
                     console.error(`❌ Error data from ${endpoint}:`, errorData);
+                      // Log details array specifically if it exists
+                    if (errorData.details && Array.isArray(errorData.details)) {
+                        console.error(`🔍 Error details:`, errorData.details);
+                        errorData.details.forEach((detail: any, index: number) => {
+                            console.error(`  ${index + 1}. ${detail}`);
+                        });
+                    }
                 } catch (parseError) {
                     console.error(`❌ Error parsing response from ${endpoint}:`, parseError);
                     errorData = { message: `Error ${response.status}: ${response.statusText}` };

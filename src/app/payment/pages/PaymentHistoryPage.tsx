@@ -15,26 +15,17 @@ const PaymentHistoryPage: React.FC = () => {
         processRefund 
     } = usePayment();
     
-    const [filter, setFilter] = useState<'all' | 'pending' | 'completed' | 'failed' | 'refunded'>('all');
     const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
 
     useEffect(() => {
         loadMyPayments();
     }, [loadMyPayments]);
 
-    const filteredPayments = payments.filter(payment => {
-        if (filter === 'all') return true;
-        return payment.status.toLowerCase() === filter.toUpperCase();
-    });
-
-    const getFilterCount = (filterType: string) => {
-        if (filterType === 'all') return payments.length;
-        return payments.filter(p => p.status.toLowerCase() === filterType.toUpperCase()).length;
-    };
+    const filteredPayments = payments;
 
     const getTotalAmount = () => {
         return payments
-            .filter(p => p.status === 'COMPLETED')
+            .filter(p => p.status === 'completed')
             .reduce((sum, payment) => sum + payment.amount, 0);
     };
 
@@ -75,7 +66,7 @@ const PaymentHistoryPage: React.FC = () => {
             </div>
 
             {/* Estadísticas rápidas */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div className="bg-white p-6 rounded-lg shadow">
                     <div className="flex items-center">
                         <div className="p-2 bg-blue-100 rounded-lg">
@@ -86,34 +77,6 @@ const PaymentHistoryPage: React.FC = () => {
                         <div className="ml-4">
                             <p className="text-sm text-gray-600">Total Pagos</p>
                             <p className="text-2xl font-semibold text-gray-900">{payments.length}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-white p-6 rounded-lg shadow">
-                    <div className="flex items-center">
-                        <div className="p-2 bg-green-100 rounded-lg">
-                            <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <div className="ml-4">
-                            <p className="text-sm text-gray-600">Completados</p>
-                            <p className="text-2xl font-semibold text-gray-900">{getFilterCount('completed')}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-white p-6 rounded-lg shadow">
-                    <div className="flex items-center">
-                        <div className="p-2 bg-yellow-100 rounded-lg">
-                            <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <div className="ml-4">
-                            <p className="text-sm text-gray-600">Pendientes</p>
-                            <p className="text-2xl font-semibold text-gray-900">{getFilterCount('pending')}</p>
                         </div>
                     </div>
                 </div>
@@ -139,62 +102,6 @@ const PaymentHistoryPage: React.FC = () => {
                 </div>
             )}
 
-            {/* Filter Tabs */}
-            <div className="mb-8">
-                <nav className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
-                    <button
-                        onClick={() => setFilter('all')}
-                        className={`px-4 py-2 rounded-md font-medium text-sm transition-colors ${
-                            filter === 'all'
-                                ? 'bg-white text-blue-600 shadow-sm'
-                                : 'text-gray-600 hover:text-gray-900'
-                        }`}
-                    >
-                        Todos ({getFilterCount('all')})
-                    </button>
-                    <button
-                        onClick={() => setFilter('pending')}
-                        className={`px-4 py-2 rounded-md font-medium text-sm transition-colors ${
-                            filter === 'pending'
-                                ? 'bg-white text-blue-600 shadow-sm'
-                                : 'text-gray-600 hover:text-gray-900'
-                        }`}
-                    >
-                        Pendientes ({getFilterCount('pending')})
-                    </button>
-                    <button
-                        onClick={() => setFilter('completed')}
-                        className={`px-4 py-2 rounded-md font-medium text-sm transition-colors ${
-                            filter === 'completed'
-                                ? 'bg-white text-blue-600 shadow-sm'
-                                : 'text-gray-600 hover:text-gray-900'
-                        }`}
-                    >
-                        Completados ({getFilterCount('completed')})
-                    </button>
-                    <button
-                        onClick={() => setFilter('failed')}
-                        className={`px-4 py-2 rounded-md font-medium text-sm transition-colors ${
-                            filter === 'failed'
-                                ? 'bg-white text-blue-600 shadow-sm'
-                                : 'text-gray-600 hover:text-gray-900'
-                        }`}
-                    >
-                        Fallidos ({getFilterCount('failed')})
-                    </button>
-                    <button
-                        onClick={() => setFilter('refunded')}
-                        className={`px-4 py-2 rounded-md font-medium text-sm transition-colors ${
-                            filter === 'refunded'
-                                ? 'bg-white text-blue-600 shadow-sm'
-                                : 'text-gray-600 hover:text-gray-900'
-                        }`}
-                    >
-                        Reembolsados ({getFilterCount('refunded')})
-                    </button>
-                </nav>
-            </div>
-
             {/* Payments List */}
             {filteredPayments.length === 0 ? (
                 <div className="text-center py-12">
@@ -204,17 +111,10 @@ const PaymentHistoryPage: React.FC = () => {
                         </svg>
                     </div>
                     <h3 className="text-lg font-medium text-gray-900 mb-2">
-                        {filter === 'all' ? 'No tienes pagos aún' : 
-                         filter === 'pending' ? 'No hay pagos pendientes' :
-                         filter === 'completed' ? 'No hay pagos completados' :
-                         filter === 'failed' ? 'No hay pagos fallidos' :
-                         filter === 'refunded' ? 'No hay pagos reembolsados' : 'No hay pagos'}
+                        No tienes pagos aún
                     </h3>
                     <p className="text-gray-500">
-                        {filter === 'all' 
-                            ? 'Los pagos que realices aparecerán aquí'
-                            : `Los pagos ${filter} aparecerán aquí`
-                        }
+                        Los pagos que realices aparecerán aquí
                     </p>
                 </div>
             ) : (
