@@ -12,9 +12,8 @@ import type {
 
 const API_BASE_URL = 'http://localhost:8080'; // Agregamos esta constante
 
-export class ParkingService {
-    private static readonly PARKING_BASE_PATH = '/parking';
-    private static readonly SCHEDULE_BASE_PATH = '/schedule';
+export class ParkingService {    private static readonly PARKING_BASE_PATH = '/api/parking-management/parking';
+    private static readonly SCHEDULE_BASE_PATH = '/api/parking-management/schedule';
 
     // ===============================
     // MÉTODOS PARA ESTACIONAMIENTOS

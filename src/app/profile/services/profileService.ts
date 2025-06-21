@@ -24,7 +24,7 @@ export interface UpdateProfileRequest {
 }
 
 export class ProfileService {
-    private static readonly BASE_PATH = '/profiles';
+    private static readonly BASE_PATH = '/api/profiles';
 
     /**
      * Obtener perfil por ID

@@ -4,7 +4,7 @@ import { apiService } from '../../shared/utils/api';
 import type { Schedule, CreateScheduleRequest, UpdateScheduleRequest } from '../types/schedule.types';
 
 export class ScheduleService {
-    private static readonly BASE_PATH = '/schedule';
+    private static readonly BASE_PATH = '/api/parking-management/schedule';
 
     /**
      * Obtener todos los horarios

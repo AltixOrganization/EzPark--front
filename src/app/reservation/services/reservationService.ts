@@ -4,7 +4,7 @@ import { apiService } from '../../shared/utils/api';
 import type { Reservation, CreateReservationRequest, UpdateReservationRequest } from '../types/reservation.types';
 
 export class ReservationService {
-    private static readonly BASE_PATH = '/reservations';
+    private static readonly BASE_PATH = '/api/reservations';
 
     static async getAllReservations(): Promise<Reservation[]> {
         return await apiService.get<Reservation[]>(this.BASE_PATH);

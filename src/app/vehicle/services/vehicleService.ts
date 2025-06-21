@@ -14,9 +14,9 @@ import type {
 } from '../types/vehicle.types';
 
 export class VehicleService {
-    private static readonly VEHICLE_BASE_PATH = '/vehicles';
-    private static readonly BRAND_BASE_PATH = '/brands';
-    private static readonly MODEL_BASE_PATH = '/models';
+    private static readonly VEHICLE_BASE_PATH = '/api/vehicles-management/vehicles';
+    private static readonly BRAND_BASE_PATH = '/api/vehicles-management/brands';
+    private static readonly MODEL_BASE_PATH = '/api/vehicles-management/models';
 
     // Vehicle endpoints
     static async getAllVehicles(): Promise<Vehicle[]> {

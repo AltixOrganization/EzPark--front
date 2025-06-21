@@ -22,13 +22,11 @@ export class PaymentService {
                 const parsedUser = JSON.parse(user);
                 console.log('👤 User roles:', parsedUser.roles);
                 console.log('👤 User ID:', parsedUser.id);
-            }
-
-            // Adaptamos los datos al formato que espera el backend
+            }            // Adaptamos los datos al formato que espera el backend
             const backendPayload = {
                 amount: paymentData.amount,
                 currency: "PEN", // Moneda por defecto
-                status: "CANCELED", // Estado que solicitas
+                status: "PENDING", // Estado inicial correcto
                 paymentMethod: paymentData.paymentMethod.toUpperCase(),
                 reservationId: paymentData.reservationId
             };
@@ -41,7 +39,7 @@ export class PaymentService {
             console.log('- paymentMethod:', backendPayload.paymentMethod);
             console.log('- reservationId:', backendPayload.reservationId, 'type:', typeof backendPayload.reservationId);
 
-            const response = await apiService.post<Payment>('/payments', backendPayload);
+            const response = await apiService.post<Payment>('/api/payments', backendPayload);
             console.log('✅ Payment response received:', response);
             
             // Adaptar la respuesta del backend al formato que espera el frontend
@@ -56,22 +54,18 @@ export class PaymentService {
             console.error('Error processing payment:', error);
             throw error;
         }
-    }
-
-    // Obtener todos los pagos
+    }    // Obtener todos los pagos
     static async getAllPayments(): Promise<Payment[]> {
         try {
-            return await apiService.get<Payment[]>('/payments');
+            return await apiService.get<Payment[]>('/api/payments');
         } catch (error) {
             console.error('Error fetching all payments:', error);
             throw error;
         }
-    }
-
-    // Obtener historial de pagos del usuario (same as getAllPayments based on backend API)
+    }    // Obtener historial de pagos del usuario (same as getAllPayments based on backend API)
     static async getPaymentHistory(): Promise<Payment[]> {
         try {
-            return await apiService.get<Payment[]>('/payments');
+            return await apiService.get<Payment[]>('/api/payments');
         } catch (error) {
             console.error('Error fetching payment history:', error);
             throw error;
@@ -81,7 +75,7 @@ export class PaymentService {
     // Obtener detalles de un pago
     static async getPayment(paymentId: number): Promise<Payment> {
         try {
-            return await apiService.get<Payment>(`/payments/${paymentId}`);
+            return await apiService.get<Payment>(`/api/payments/${paymentId}`);
         } catch (error) {
             console.error('Error fetching payment:', error);
             throw error;
@@ -91,7 +85,7 @@ export class PaymentService {
     // Obtener pago de una reserva específica
     static async getPaymentByReservation(reservationId: number): Promise<Payment | null> {
         try {
-            return await apiService.get<Payment>(`/payments?reservationId=${reservationId}`);
+            return await apiService.get<Payment>(`/api/payments?reservationId=${reservationId}`);
         } catch (error) {
             console.error('Error fetching payment by reservation:', error);
             return null;
@@ -101,7 +95,7 @@ export class PaymentService {
     // Cancelar pago
     static async cancelPayment(paymentId: number): Promise<PaymentResponse> {
         try {
-            return await apiService.post<PaymentResponse>(`/payments/${paymentId}/cancel`, {});
+            return await apiService.post<PaymentResponse>(`/api/payments/${paymentId}/cancel`, {});
         } catch (error) {
             console.error('Error cancelling payment:', error);
             throw error;
