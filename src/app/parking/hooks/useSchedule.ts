@@ -57,7 +57,28 @@ export const useSchedule = (): UseScheduleReturn => {
             setCreating(true);
             setError(null);
 
-            const newSchedule = await ScheduleService.createSchedule(data);
+            // Función para formatear tiempo a HH:MM:SS
+            const formatTime = (time: string): string => {
+                const timeParts = time.split(':');
+                if (timeParts.length === 2) {
+                    return `${time}:00`; // Agregar :00 si solo tiene HH:MM
+                } else if (timeParts.length === 3) {
+                    return time; // Ya tiene el formato correcto
+                } else {
+                    throw new Error(`Formato de tiempo inválido: ${time}`);
+                }
+            };
+
+            // Formatear los datos antes de enviarlos
+            const formattedData: CreateScheduleRequest = {
+                ...data,
+                startTime: formatTime(data.startTime),
+                endTime: formatTime(data.endTime)
+            };
+
+            console.log('📅 Data being sent to service:', formattedData);
+            
+            const newSchedule = await ScheduleService.createSchedule(formattedData);
             setSchedules(prev => [...prev, newSchedule]);
             
             console.log('✅ Horario creado exitosamente:', newSchedule);

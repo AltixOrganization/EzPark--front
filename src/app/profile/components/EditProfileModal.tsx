@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Profile, UpdateProfileRequest } from '../services/profileService';
 import { useProfile } from '../hooks/useProfile';
+import { useAuth } from '../../shared/hooks/useAuth';
 
 interface EditProfileModalProps {
     profile: Profile;
@@ -9,6 +10,7 @@ interface EditProfileModalProps {
 
 const EditProfileModal: React.FC<EditProfileModalProps> = ({ profile, onClose }) => {
     const { updateProfile, updating, error } = useProfile();
+    const { user } = useAuth(); // Obtener el usuario para acceder al email
     const [formData, setFormData] = useState<UpdateProfileRequest>({
         firstName: profile.firstName,
         lastName: profile.lastName,
@@ -203,7 +205,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ profile, onClose })
                             </label>
                             <input
                                 type="email"
-                                value={profile.userId ? `usuario-${profile.userId}@ezpark.com` : 'No disponible'}
+                                value={user?.email || 'No disponible'}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
                                 disabled
                             />

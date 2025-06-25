@@ -8,7 +8,7 @@ export class AuthService {
     static async signIn(credentials: SignInRequest): Promise<AuthenticatedUser> {
         try {
             console.log('📤 Enviando datos de login:', credentials);
-              const response = await apiService.post<AuthenticatedUser>('/auth/authentication/sign-in', {
+              const response = await apiService.post<AuthenticatedUser>('/api/auth/authentication/sign-in', {
                 email: credentials.email,
                 password: credentials.password
             });
@@ -95,7 +95,7 @@ export class AuthService {
                 password: '*'.repeat(dataToSend.password.length) // Ocultar password en logs
             });
             
-            const response = await apiService.post<User>('/auth/authentication/sign-up', dataToSend);
+            const response = await apiService.post<User>('/api/auth/authentication/sign-up', dataToSend);
             
             console.log('✅ Respuesta de registro exitoso:', response);
             

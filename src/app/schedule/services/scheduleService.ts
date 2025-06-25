@@ -67,7 +67,7 @@ export class ScheduleService {
      * Crear nuevo horario
      */
     static async createSchedule(data: CreateScheduleRequest): Promise<Schedule> {
-        console.log('📅 Creating schedule:', data);
+        console.log('📅 Creating schedule with pre-formatted data:', data);
         return await apiService.post<Schedule>(this.BASE_PATH, data);
     }
 

@@ -94,12 +94,28 @@ export const useSchedule = () => {
                 throw new Error('La hora de inicio debe ser anterior a la hora de fin');
             }
 
-            // Verificar conflictos
+            // Función para formatear tiempo a HH:MM:SS
+            const formatTime = (time: string): string => {
+                const timeParts = time.split(':');
+                if (timeParts.length === 2) {
+                    return `${time}:00`; // Agregar :00 si solo tiene HH:MM
+                } else if (timeParts.length === 3) {
+                    return time; // Ya tiene el formato correcto
+                } else {
+                    throw new Error(`Formato de tiempo inválido: ${time}`);
+                }
+            };
+
+            // Formatear los tiempos antes de usar en validaciones
+            const formattedStartTime = formatTime(scheduleData.startTime);
+            const formattedEndTime = formatTime(scheduleData.endTime);
+
+            // Verificar conflictos con tiempos formateados
             const conflictCheck = await ScheduleService.checkScheduleConflicts(
                 scheduleData.parkingId,
                 scheduleData.day,
-                scheduleData.startTime,
-                scheduleData.endTime
+                formattedStartTime,
+                formattedEndTime
             );
 
             if (conflictCheck.hasConflict) {
@@ -111,10 +127,12 @@ export const useSchedule = () => {
             const createData: CreateScheduleRequest = {
                 parkingId: scheduleData.parkingId,
                 day: scheduleData.day,
-                startTime: scheduleData.startTime,
-                endTime: scheduleData.endTime
+                startTime: formattedStartTime,  // ✅ Usar tiempo formateado
+                endTime: formattedEndTime       // ✅ Usar tiempo formateado
             };
 
+            console.log('📅 Data being sent to service:', createData);
+            
             const newSchedule = await ScheduleService.createSchedule(createData);
             setSchedules(prev => [...prev, newSchedule]);
             return newSchedule;
@@ -128,15 +146,31 @@ export const useSchedule = () => {
     }, []);
 
     // Actualizar horario existente
-    const updateSchedule = useCallback(async (id: number, scheduleData: Partial<ScheduleFormData>) => {
+        const updateSchedule = useCallback(async (id: number, scheduleData: Partial<ScheduleFormData>) => {
         try {
             setLoading(true);
             setError(null);
 
+            // Función para formatear tiempo a HH:MM:SS (reutilizar la misma lógica)
+            const formatTime = (time: string): string => {
+                const timeParts = time.split(':');
+                if (timeParts.length === 2) {
+                    return `${time}:00`; // Agregar :00 si solo tiene HH:MM
+                } else if (timeParts.length === 3) {
+                    return time; // Ya tiene el formato correcto
+                } else {
+                    throw new Error(`Formato de tiempo inválido: ${time}`);
+                }
+            };
+
+            // Formatear los tiempos antes de crear updateData
+            const formattedStartTime = scheduleData.startTime ? formatTime(scheduleData.startTime) : '';
+            const formattedEndTime = scheduleData.endTime ? formatTime(scheduleData.endTime) : '';
+
             const updateData: UpdateScheduleRequest = {
                 day: scheduleData.day!,
-                startTime: scheduleData.startTime!,
-                endTime: scheduleData.endTime!
+                startTime: formattedStartTime,  // ✅ Usar tiempo formateado
+                endTime: formattedEndTime       // ✅ Usar tiempo formateado
             };
 
             // Validaciones básicas
@@ -161,6 +195,8 @@ export const useSchedule = () => {
                 }
             }
 
+            console.log('🔄 Data being sent to update service:', updateData);
+            
             const updatedSchedule = await ScheduleService.updateSchedule(id, updateData);
             setSchedules(prev => prev.map(s => s.id === id ? updatedSchedule : s));
             return updatedSchedule;

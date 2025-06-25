@@ -1,9 +1,10 @@
 // src/app/reservation/components/ReservationCard.tsx
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { Reservation } from '../types/reservation.types';
+import { ParkingService } from '../../parking/services/parkingService';
 
 interface ReservationCardProps {
     reservation: Reservation;
@@ -22,6 +23,31 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
     isHost = false,
     paymentStatus = 'none'
 }) => {
+
+    const [parkingAddress, setParkingAddress] = useState<string>('');
+    const [loadingAddress, setLoadingAddress] = useState(false);
+
+        // Cargar la dirección del parking
+    useEffect(() => {
+        const loadParkingAddress = async () => {
+            if (reservation.parkingId && !reservation.parking?.location?.address) {
+                try {
+                    setLoadingAddress(true);
+                    const parkingDetails = await ParkingService.getParkingById(reservation.parkingId);
+                    setParkingAddress(parkingDetails.location?.address || 'Dirección no disponible');
+                } catch (error) {
+                    console.error('Error al cargar dirección del parking:', error);
+                    setParkingAddress('Dirección no disponible');
+                } finally {
+                    setLoadingAddress(false);
+                }
+            }
+        };
+
+        loadParkingAddress();
+    }, [reservation.parkingId, reservation.parking?.location?.address]);
+
+
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'Pending':
@@ -72,6 +98,20 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
         }
     };
 
+    // Determinar qué dirección mostrar
+    const displayAddress = () => {
+        if (reservation.parking?.location?.address) {
+            return reservation.parking.location.address;
+        }
+        if (parkingAddress) {
+            return parkingAddress;
+        }
+        if (loadingAddress) {
+            return 'Cargando dirección...';
+        }
+        return 'Dirección no disponible';
+    };
+
     return (
         <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow">
             <div className="flex justify-between items-start mb-4">
@@ -80,7 +120,7 @@ const ReservationCard: React.FC<ReservationCardProps> = ({
                         {reservation.parking?.space || `Espacio #${reservation.parkingId}`}
                     </h3>
                     <p className="text-sm text-gray-600 mb-1">
-                        📍 {reservation.parking?.location?.address || 'Dirección no disponible'}
+                        📍 {displayAddress()}
                     </p>
                     {reservation.parking?.location?.district && (
                         <p className="text-sm text-gray-600">
