@@ -25,9 +25,9 @@ export class PaymentService {
             }            // Adaptamos los datos al formato que espera el backend
             const backendPayload = {
                 amount: paymentData.amount,
-                currency: "PEN", // Moneda por defecto
-                status: "PENDING", // Estado inicial correcto
-                paymentMethod: paymentData.paymentMethod.toUpperCase(),
+                currency: paymentData.currency || "PEN", // Usar la moneda del request o PEN por defecto
+                status: "COMPLETED", // Estado inicial que el backend acepta
+                paymentMethod: paymentData.paymentMethod,
                 reservationId: paymentData.reservationId
             };
 

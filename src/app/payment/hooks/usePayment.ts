@@ -22,7 +22,7 @@ export const usePayment = () => {
                 reservationId: reservation.id,
                 amount: reservation.totalFare,
                 currency: 'PEN', // Soles peruanos
-                paymentMethod: 'credit_card',
+                paymentMethod: 'CREDIT_CARD',
                 cardDetails: {
                     cardNumber: paymentData.cardNumber,
                     expiryDate: paymentData.expiryDate,
@@ -127,7 +127,7 @@ export const usePayment = () => {
                 // Actualizar el estado local del pago
                 setPayments(prev => prev.map(payment => 
                     payment.id === paymentId 
-                        ? { ...payment, status: 'cancelled' as const }
+                        ? { ...payment, status: 'CANCELED' as const }
                         : payment
                 ));
                 return response;

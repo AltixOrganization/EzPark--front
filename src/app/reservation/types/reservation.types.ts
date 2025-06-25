@@ -83,10 +83,15 @@ export interface UpdateReservationRequest {
 
 export interface ReservationFormData {
     vehicleId: number;
-    scheduleId: number;
+    scheduleIds: number[]; // Array para múltiples horarios
     reservationDate: string;
-    startTime: string;
-    endTime: string;
+    selectedSchedules: {
+        id: number;
+        day: string;
+        startTime: string;
+        endTime: string;
+        isAvailable: boolean;
+    }[]; // Array de horarios seleccionados
 }
 
 // Estados de reservación para filtros

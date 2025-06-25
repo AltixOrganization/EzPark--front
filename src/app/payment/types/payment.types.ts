@@ -12,13 +12,13 @@ export interface Payment {
     id: number;
     amount: number;
     currency: string;
-    status: 'pending' | 'completed' | 'failed' | 'cancelled';
-    paymentMethod: 'credit_card' | 'debit_card' | 'paypal';
+    status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'CANCELED';
+    paymentMethod: 'CREDIT_CARD' | 'DEBIT_CARD' | 'PAYPAL' | 'CASH' | 'BANK_TRANSFER';
     transactionId?: string;
     reservationId: number;
-    guestId: number;
-    createdAt: string;
-    updatedAt: string;
+    guestId?: number;
+    createdAt?: string;
+    updatedAt?: string;
     
     // Datos de la tarjeta (solo los últimos 4 dígitos)
     cardLastFour?: string;
@@ -29,7 +29,7 @@ export interface PaymentRequest {
     reservationId: number;
     amount: number;
     currency: string;
-    paymentMethod: 'credit_card' | 'debit_card' | 'paypal';
+    paymentMethod: 'CREDIT_CARD' | 'DEBIT_CARD' | 'PAYPAL' | 'CASH' | 'BANK_TRANSFER';
     cardDetails: {
         cardNumber: string;
         expiryDate: string;

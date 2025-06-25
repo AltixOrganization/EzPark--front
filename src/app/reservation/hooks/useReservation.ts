@@ -44,7 +44,7 @@ export const useReservation = () => {
         }
     }, [user?.id]);
 
-    // Crear reservación
+    // Crear múltiples reservaciones
     const createReservation = useCallback(async (formData: ReservationFormData, parking: Parking) => {
         if (!user?.id) throw new Error('Usuario no autenticado');
 
@@ -52,32 +52,63 @@ export const useReservation = () => {
             setLoading(true);
             setError(null);
             
-            // Calcular horas y precio total
-            const startDate = new Date(`${formData.reservationDate}T${formData.startTime}`);
-            const endDate = new Date(`${formData.reservationDate}T${formData.endTime}`);
-            const hoursRegistered = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60));
-            const totalFare = hoursRegistered * parking.price;
-
-            const reservationData: CreateReservationRequest = {
-                hoursRegistered,
-                totalFare,
-                reservationDate: formData.reservationDate,
-                startTime: formData.startTime,
-                endTime: formData.endTime,
-                guestId: user.id,
-                hostId: parking.profileId,
-                parkingId: parking.id!,
-                vehicleId: formData.vehicleId,
-                scheduleId: formData.scheduleId
-            };
-
-            console.log('📝 Creating reservation:', reservationData);
-            const newReservation = await ReservationService.createReservation(reservationData);
+            console.log('📝 Creating multiple reservations for schedules:', formData.scheduleIds);
             
-            setReservations(prev => [...prev, newReservation]);
-            return newReservation;
+            const createdReservations: Reservation[] = [];
+            let failedReservations = 0;
+            
+            // Crear una reservación por cada horario seleccionado
+            for (const schedule of formData.selectedSchedules) {
+                try {
+                    // Calcular horas y precio para este horario específico
+                    const startDate = new Date(`${schedule.day}T${schedule.startTime}`);
+                    const endDate = new Date(`${schedule.day}T${schedule.endTime}`);
+                    const hoursRegistered = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60));
+                    const totalFare = hoursRegistered * parking.price;
+
+                    const reservationData: CreateReservationRequest = {
+                        hoursRegistered,
+                        totalFare,
+                        reservationDate: schedule.day,
+                        startTime: schedule.startTime,
+                        endTime: schedule.endTime,
+                        guestId: user.id,
+                        hostId: parking.profileId,
+                        parkingId: parking.id!,
+                        vehicleId: formData.vehicleId,
+                        scheduleId: schedule.id
+                    };
+
+                    console.log(`📝 Creating reservation for schedule ${schedule.id}:`, reservationData);
+                    const newReservation = await ReservationService.createReservation(reservationData);
+                    createdReservations.push(newReservation);
+                    console.log(`✅ Reservation created for ${schedule.startTime}-${schedule.endTime}`);
+                } catch (error) {
+                    console.error(`❌ Error creating reservation for schedule ${schedule.id}:`, error);
+                    failedReservations++;
+                }
+            }
+            
+            // Actualizar estado con las reservaciones creadas exitosamente
+            if (createdReservations.length > 0) {
+                setReservations(prev => [...prev, ...createdReservations]);
+            }
+            
+            // Mostrar resumen
+            const totalSchedules = formData.selectedSchedules.length;
+            const successfulReservations = createdReservations.length;
+            
+            console.log(`✅ Resumen: ${successfulReservations}/${totalSchedules} reservaciones creadas exitosamente`);
+            
+            if (failedReservations > 0) {
+                const errorMessage = `Se crearon ${successfulReservations} reservaciones, pero ${failedReservations} fallaron.`;
+                setError(errorMessage);
+                throw new Error(errorMessage);
+            }
+            
+            return createdReservations; // Retornar array de reservaciones creadas
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Error al crear reservación';
+            const errorMessage = error instanceof Error ? error.message : 'Error al crear reservaciones';
             setError(errorMessage);
             throw new Error(errorMessage);
         } finally {

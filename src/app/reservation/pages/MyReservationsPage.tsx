@@ -12,8 +12,8 @@ import type { PaymentFormData } from '../../payment/types/payment.types';
 const MyReservationsPage: React.FC = () => {
     const { reservations, loading, error, loadMyReservations } = useReservation();
     const { 
-        createPaymentForReservation, 
-        getPaymentForReservation,
+        processPayment, 
+        getPaymentByReservation,
         loading: paymentLoading,
         error: paymentError
     } = usePayment();
@@ -33,13 +33,14 @@ const MyReservationsPage: React.FC = () => {
             
             for (const reservation of approvedReservations) {
                 if (!(reservation.id in paymentStatuses)) {
-                    const payment = await getPaymentForReservation(reservation.id);
+                    const payment = await getPaymentByReservation(reservation.id);
                     setPaymentStatuses(prev => ({
                         ...prev,
                         [reservation.id]: payment 
                             ? (payment.status === 'COMPLETED' ? 'completed' :
                                payment.status === 'PENDING' ? 'pending' : 
-                               payment.status === 'FAILED' ? 'failed' : 'none')
+                               payment.status === 'FAILED' ? 'failed' :
+                               payment.status === 'CANCELED' ? 'failed' : 'none')
                             : 'none'
                     }));
                 }
@@ -49,7 +50,7 @@ const MyReservationsPage: React.FC = () => {
         if (reservations.length > 0) {
             checkPaymentStatuses();
         }
-    }, [reservations, getPaymentForReservation, paymentStatuses]);
+    }, [reservations, getPaymentByReservation, paymentStatuses]);
 
     const handlePayReservation = (reservation: Reservation) => {
         setSelectedReservation(reservation);
@@ -66,18 +67,22 @@ const MyReservationsPage: React.FC = () => {
                 [selectedReservation.id]: 'pending'
             }));
 
-            await createPaymentForReservation(selectedReservation, paymentData);
+            const paymentResponse = await processPayment(selectedReservation, paymentData);
             
-            // Actualizar estado a completed
-            setPaymentStatuses(prev => ({
-                ...prev,
-                [selectedReservation.id]: 'completed'
-            }));
+            if (paymentResponse && paymentResponse.success) {
+                // Actualizar estado a completed
+                setPaymentStatuses(prev => ({
+                    ...prev,
+                    [selectedReservation.id]: 'completed'
+                }));
 
-            setShowPaymentModal(false);
-            setSelectedReservation(null);
-            
-            alert('🎉 ¡Pago procesado exitosamente! Tu reservación está confirmada.');
+                setShowPaymentModal(false);
+                setSelectedReservation(null);
+                
+                alert('🎉 ¡Pago procesado exitosamente! Tu reservación está confirmada.');
+            } else {
+                throw new Error(paymentResponse?.error || 'Error al procesar el pago');
+            }
         } catch (error) {
             // Actualizar estado a failed
             setPaymentStatuses(prev => ({

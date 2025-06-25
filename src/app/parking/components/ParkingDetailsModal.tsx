@@ -7,8 +7,10 @@ import { useGoogleMaps } from "../../shared/providers/GoogleMapsProvider";
 import { useAuth } from "../../shared/hooks/useAuth";
 import { useReservation } from "../../reservation/hooks/useReservation";
 import ReservationForm from "../../reservation/components/ReservationForm";
+import MultipleReservationResult from "../../reservation/components/MultipleReservationResult";
 import type { ReservationFormData } from "../../reservation/types/reservation.types";
 import type { Parking } from '../types/parking.types';
+import type { Reservation } from '../../reservation/types/reservation.types';
 import ScheduleManager from './schedule/ScheduleManager';
 
 const mapContainerStyle = {
@@ -35,24 +37,41 @@ const ParkingDetailsModal: React.FC<ParkingDetailsModalProps> = ({
     const { isLoaded, loadError } = useGoogleMaps();
     const { user } = useAuth();
     const { createReservation, loading: reservationLoading } = useReservation();
-    const navigate = useNavigate();    const [showReservationForm, setShowReservationForm] = useState(false);
+    const navigate = useNavigate();
+    
+    const [showReservationForm, setShowReservationForm] = useState(false);
+    const [createdReservations, setCreatedReservations] = useState<Reservation[]>([]);
+    const [showReservationResult, setShowReservationResult] = useState(false);
     
     const handleReservationSubmit = async (formData: ReservationFormData) => {
         try {
-            const newReservation = await createReservation(formData, parking);
+            console.log('📝 Submitting reservation form data:', formData);
             
-            // Guardar la reserva en localStorage para la página de pago
-            localStorage.setItem('pendingReservation', JSON.stringify(newReservation));
+            // createReservation ahora retorna un array de reservaciones
+            const newReservations = await createReservation(formData, parking);
             
-            // Cerrar el modal
-            onClose();
+            console.log('✅ Reservations created:', newReservations);
             
-            // Redirigir a la página de pagos
-            navigate('/payment');
+            // Guardar las reservaciones y mostrar el resultado
+            setCreatedReservations(Array.isArray(newReservations) ? newReservations : [newReservations]);
+            setShowReservationForm(false);
+            setShowReservationResult(true);
+            
         } catch (error) {
-            console.error('Error creating reservation:', error);
-            alert('Error al crear la reservación: ' + (error instanceof Error ? error.message : 'Error desconocido'));
+            console.error('Error creating reservations:', error);
+            alert('Error al crear las reservaciones: ' + (error instanceof Error ? error.message : 'Error desconocido'));
         }
+    };
+
+    const handleViewReservations = () => {
+        setShowReservationResult(false);
+        onClose();
+        navigate('/my-reservations');
+    };
+
+    const handleCloseResult = () => {
+        setShowReservationResult(false);
+        setCreatedReservations([]);
     };
 
     const canReserve = user && !isOwner && parking.space > 0;
@@ -450,6 +469,15 @@ const ParkingDetailsModal: React.FC<ParkingDetailsModalProps> = ({
                     </div>
                 </div>
             </div>
+            
+            {/* Modal de resultado de múltiples reservaciones */}
+            {showReservationResult && createdReservations.length > 0 && (
+                <MultipleReservationResult
+                    reservations={createdReservations}
+                    onClose={handleCloseResult}
+                    onViewReservations={handleViewReservations}
+                />
+            )}
         </div>
     );
 };

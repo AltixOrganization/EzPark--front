@@ -25,7 +25,7 @@ const PaymentHistoryPage: React.FC = () => {
 
     const getTotalAmount = () => {
         return payments
-            .filter(p => p.status === 'completed')
+            .filter(p => p.status === 'COMPLETED')
             .reduce((sum, payment) => sum + payment.amount, 0);
     };
 

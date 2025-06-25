@@ -87,6 +87,10 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
                 return 'Tarjeta de Débito';
             case 'paypal':
                 return 'PayPal';
+            case 'cash':
+                return 'Efectivo';
+            case 'bank_transfer':
+                return 'Transferencia Bancaria';
             default:
                 return method;
         }
@@ -147,7 +151,7 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
                 <div className="flex justify-between items-center">
                     <span className="text-sm font-medium text-gray-700">Fecha:</span>
                     <span className="text-sm text-gray-900">
-                        {formatDate(payment.createdAt)}
+                        {payment.createdAt ? formatDate(payment.createdAt) : 'Fecha no disponible'}
                     </span>
                 </div>
             </div>
@@ -165,7 +169,7 @@ const PaymentCard: React.FC<PaymentCardProps> = ({
                             </button>
                         )}
                         
-                        {onRefund && payment.status === 'completed' && isAdmin && (
+                        {onRefund && payment.status === 'COMPLETED' && isAdmin && (
                             <button
                                 onClick={() => onRefund(payment.id)}
                                 className="flex-1 px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
