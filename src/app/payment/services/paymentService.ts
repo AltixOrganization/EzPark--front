@@ -102,6 +102,43 @@ export class PaymentService {
         }
     }
 
+    // Obtener pagos del usuario actual basado en sus reservaciones
+    static async getMyPayments(): Promise<Payment[]> {
+        try {
+            // Obtener el usuario actual del localStorage
+            const user = localStorage.getItem('ezpark_user');
+            if (!user) {
+                throw new Error('No user logged in');
+            }
+            
+            const parsedUser = JSON.parse(user);
+            const userId = parsedUser.id;
+            
+            // Primero obtenemos las reservaciones del usuario
+            const reservations = await apiService.get<any[]>(`/api/reservations/guest/${userId}`);
+            
+            // Luego obtenemos los pagos de cada reservación
+            const payments: Payment[] = [];
+            
+            for (const reservation of reservations) {
+                try {
+                    const payment = await apiService.get<Payment>(`/api/payments?reservationId=${reservation.id}`);
+                    if (payment) {
+                        payments.push(payment);
+                    }
+                } catch (error) {
+                    // Si no hay pago para esta reservación, simplemente continuamos
+                    console.log(`No payment found for reservation ${reservation.id}`);
+                }
+            }
+            
+            return payments;
+        } catch (error) {
+            console.error('Error fetching my payments:', error);
+            throw error;
+        }
+    }
+
     // Validar datos de tarjeta de crédito
     static validateCardNumber(cardNumber: string): boolean {
         // Algoritmo de Luhn para validar número de tarjeta

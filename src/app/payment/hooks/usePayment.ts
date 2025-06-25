@@ -74,8 +74,8 @@ export const usePayment = () => {
         setError(null);
 
         try {
-            const allPayments = await PaymentService.getAllPayments();
-            setPayments(allPayments);
+            const myPayments = await PaymentService.getMyPayments();
+            setPayments(myPayments);
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Error al obtener los pagos';
             setError(errorMessage);
@@ -89,7 +89,7 @@ export const usePayment = () => {
         setError(null);
 
         try {
-            const history = await PaymentService.getPaymentHistory();
+            const history = await PaymentService.getMyPayments();
             return history;
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Error al obtener el historial de pagos';
