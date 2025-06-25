@@ -88,6 +88,44 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
         }
     };
 
+    // Función para generar vista previa de horarios
+    const previewGeneratedSchedules = () => {
+        if (!formData.startTime || !formData.endTime || !formData.day) {
+            return [];
+        }
+
+        const schedules = [];
+        const startDate = new Date(`2000-01-01T${formData.startTime}`);
+        const endDate = new Date(`2000-01-01T${formData.endTime}`);
+        
+        if (startDate >= endDate) {
+            return [];
+        }
+        
+        let currentTime = new Date(startDate);
+        
+        while (currentTime < endDate) {
+            const nextHour = new Date(currentTime);
+            nextHour.setHours(nextHour.getHours() + 1);
+            
+            if (nextHour > endDate) {
+                nextHour.setTime(endDate.getTime());
+            }
+            
+            const scheduleStartTime = currentTime.toTimeString().slice(0, 5);
+            const scheduleEndTime = nextHour.toTimeString().slice(0, 5);
+            
+            schedules.push({
+                start: scheduleStartTime,
+                end: scheduleEndTime
+            });
+            
+            currentTime = new Date(nextHour);
+        }
+        
+        return schedules;
+    };
+
     // Obtener fecha mínima (hoy)
     const getMinDate = () => {
         return new Date().toISOString().split('T')[0];
@@ -160,6 +198,30 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                         />
                     </div>
                 </div>
+
+                {/* Vista previa de horarios */}
+                {formData.startTime && formData.endTime && formData.day && (
+                    <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <h4 className="font-medium text-blue-900 mb-2">
+                            📅 Vista previa de horarios a crear:
+                        </h4>
+                        <p className="text-blue-800 text-sm mb-3">
+                            Se crearán {previewGeneratedSchedules().length} horarios de 1 hora cada uno para el {new Date(formData.day).toLocaleDateString('es-ES')}:
+                        </p>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-32 overflow-y-auto">
+                            {previewGeneratedSchedules().map((schedule, index) => (
+                                <div key={index} className="bg-white px-2 py-1 rounded border text-xs text-center">
+                                    {schedule.start} - {schedule.end}
+                                </div>
+                            ))}
+                        </div>
+                        {previewGeneratedSchedules().length > 12 && (
+                            <p className="text-xs text-blue-600 mt-2">
+                                💡 Tip: Los usuarios podrán seleccionar los horarios específicos que necesiten
+                            </p>
+                        )}
+                    </div>
+                )}
 
                 {/* Botones */}
                 <div className="flex items-center justify-end space-x-3 pt-4">

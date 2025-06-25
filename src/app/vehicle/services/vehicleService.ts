@@ -40,7 +40,7 @@ export class VehicleService {
         return await apiService.put<Vehicle>(`${this.VEHICLE_BASE_PATH}/${id}`, data);
     }
 
-static async deleteVehicle(id: number): Promise<void> {
+    static async deleteVehicle(id: number): Promise<void> {
         try {
             console.log(`📤 Eliminando vehículo con ID: ${id}`);
 

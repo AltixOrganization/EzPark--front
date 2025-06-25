@@ -203,6 +203,28 @@ export class ParkingService {    private static readonly PARKING_BASE_PATH = '/a
         }
     }
 
+    /**
+     * Obtener detalles completos de un parking por ID
+     */
+    static async getParkingDetails(id: number): Promise<Parking> {
+        try {
+            console.log(`📤 Obteniendo detalles del parking con ID: ${id}`);
+
+            const response = await apiService.get<Parking>(`${this.PARKING_BASE_PATH}/${id}/details`);
+
+            console.log('✅ Detalles del parking obtenidos:', response);
+            return response;
+        } catch (error: any) {
+            console.error('❌ Error al obtener detalles del parking:', error);
+
+            if (error.message.includes('404')) {
+                throw new Error('Parking no encontrado');
+            }
+
+            throw new Error(error.message || 'Error al obtener los detalles del parking');
+        }
+    }
+
     // ===============================
     // MÉTODOS PARA HORARIOS
     // ===============================

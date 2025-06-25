@@ -43,7 +43,25 @@ export const usePayment = () => {
                 return null;
             }
         } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Error desconocido al procesar el pago';
+            let errorMessage = 'Error desconocido al procesar el pago';
+            
+            if (err instanceof Error) {
+                // Manejar errores específicos
+                if (err.message.includes('503') || err.message.includes('Service Unavailable')) {
+                    errorMessage = 'El servicio de pagos no está disponible temporalmente. Por favor, inténtalo de nuevo en unos minutos.';
+                } else if (err.message.includes('ERR_COMM_001')) {
+                    errorMessage = 'Los servicios de pago externos no están disponibles. Por favor, inténtalo más tarde.';
+                } else if (err.message.includes('400')) {
+                    errorMessage = 'Datos de pago inválidos. Por favor, verifica la información ingresada.';
+                } else if (err.message.includes('401')) {
+                    errorMessage = 'No estás autorizado para realizar esta acción. Por favor, inicia sesión nuevamente.';
+                } else if (err.message.includes('500')) {
+                    errorMessage = 'Error interno del servidor. Por favor, contacta al soporte técnico.';
+                } else {
+                    errorMessage = err.message;
+                }
+            }
+            
             setError(errorMessage);
             return null;
         } finally {

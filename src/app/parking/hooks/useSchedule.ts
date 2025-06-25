@@ -51,7 +51,7 @@ export const useSchedule = (): UseScheduleReturn => {
         }
     };
 
-    // Crear nuevo horario
+    // Crear nuevo horario (ahora genera horarios por hora)
     const createSchedule = async (data: CreateScheduleRequest): Promise<boolean> => {
         try {
             setCreating(true);
@@ -69,23 +69,94 @@ export const useSchedule = (): UseScheduleReturn => {
                 }
             };
 
-            // Formatear los datos antes de enviarlos
-            const formattedData: CreateScheduleRequest = {
-                ...data,
-                startTime: formatTime(data.startTime),
-                endTime: formatTime(data.endTime)
+            // Función para generar horarios por hora
+            const generateHourlySchedules = (startTime: string, endTime: string, day: string, parkingId: number): CreateScheduleRequest[] => {
+                const schedules: CreateScheduleRequest[] = [];
+                
+                // Convertir tiempos a Date objects para facilitar cálculos
+                const startDate = new Date(`2000-01-01T${startTime}`);
+                const endDate = new Date(`2000-01-01T${endTime}`);
+                
+                // Validar que la hora de inicio sea menor que la de fin
+                if (startDate >= endDate) {
+                    throw new Error('La hora de inicio debe ser anterior a la hora de fin');
+                }
+                
+                let currentTime = new Date(startDate);
+                
+                // Generar horarios de 1 hora cada uno
+                while (currentTime < endDate) {
+                    const nextHour = new Date(currentTime);
+                    nextHour.setHours(nextHour.getHours() + 1);
+                    
+                    // Si la siguiente hora excede el tiempo final, usar el tiempo final
+                    if (nextHour > endDate) {
+                        nextHour.setTime(endDate.getTime());
+                    }
+                    
+                    const scheduleStartTime = currentTime.toTimeString().slice(0, 5); // HH:MM
+                    const scheduleEndTime = nextHour.toTimeString().slice(0, 5); // HH:MM
+                    
+                    schedules.push({
+                        parkingId,
+                        day,
+                        startTime: formatTime(scheduleStartTime),
+                        endTime: formatTime(scheduleEndTime)
+                    });
+                    
+                    currentTime = new Date(nextHour);
+                }
+                
+                return schedules;
             };
 
-            console.log('📅 Data being sent to service:', formattedData);
+            console.log('📅 Generating hourly schedules from:', data);
             
-            const newSchedule = await ScheduleService.createSchedule(formattedData);
-            setSchedules(prev => [...prev, newSchedule]);
+            // Generar todos los horarios por hora
+            const hourlySchedules = generateHourlySchedules(
+                data.startTime, 
+                data.endTime, 
+                data.day, 
+                data.parkingId
+            );
             
-            console.log('✅ Horario creado exitosamente:', newSchedule);
-            return true;
+            console.log('📅 Generated schedules:', hourlySchedules);
+            
+            // Crear todos los horarios en el backend
+            const createdSchedules: Schedule[] = [];
+            let failedSchedules = 0;
+            
+            for (const scheduleData of hourlySchedules) {
+                try {
+                    const newSchedule = await ScheduleService.createSchedule(scheduleData);
+                    createdSchedules.push(newSchedule);
+                    console.log('✅ Horario creado:', `${scheduleData.startTime}-${scheduleData.endTime}`);
+                } catch (error) {
+                    console.error('❌ Error al crear horario:', scheduleData, error);
+                    failedSchedules++;
+                }
+            }
+            
+            // Actualizar el estado con los horarios creados exitosamente
+            if (createdSchedules.length > 0) {
+                setSchedules(prev => [...prev, ...createdSchedules]);
+            }
+            
+            // Mostrar resumen
+            const totalSchedules = hourlySchedules.length;
+            const successfulSchedules = createdSchedules.length;
+            
+            console.log(`✅ Resumen: ${successfulSchedules}/${totalSchedules} horarios creados exitosamente`);
+            
+            if (failedSchedules > 0) {
+                setError(`Se crearon ${successfulSchedules} horarios, pero ${failedSchedules} fallaron. Algunos horarios pueden ya existir.`);
+            }
+            
+            return successfulSchedules > 0; // Retorna true si al menos uno fue creado
+            
         } catch (err: any) {
-            console.error('Error al crear horario:', err);
-            setError(err.message || 'Error al crear el horario');
+            console.error('Error al crear horarios:', err);
+            setError(err.message || 'Error al crear los horarios');
             return false;
         } finally {
             setCreating(false);
@@ -98,7 +169,28 @@ export const useSchedule = (): UseScheduleReturn => {
             setUpdating(true);
             setError(null);
 
-            const updatedSchedule = await ScheduleService.updateSchedule(id, data);
+            // Función para formatear tiempo a HH:MM:SS
+            const formatTime = (time: string): string => {
+                const timeParts = time.split(':');
+                if (timeParts.length === 2) {
+                    return `${time}:00`; // Agregar :00 si solo tiene HH:MM
+                } else if (timeParts.length === 3) {
+                    return time; // Ya tiene el formato correcto
+                } else {
+                    throw new Error(`Formato de tiempo inválido: ${time}`);
+                }
+            };
+
+            // Formatear los datos antes de enviarlos
+            const formattedData: UpdateScheduleRequest = {
+                ...data,
+                startTime: formatTime(data.startTime),
+                endTime: formatTime(data.endTime)
+            };
+
+            console.log('🔄 Update data being sent to service:', formattedData);
+
+            const updatedSchedule = await ScheduleService.updateSchedule(id, formattedData);
             setSchedules(prev => prev.map(s => s.id === id ? updatedSchedule : s));
             
             console.log('✅ Horario actualizado exitosamente:', updatedSchedule);
