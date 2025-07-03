@@ -1,7 +1,6 @@
 // src/app/vehicle/pages/MyVehiclesPage.tsx
 
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../../shared/hooks/useAuth';
 import { useVehicle } from '../hooks/useVehicle';
 import LoadingSpinner from '../../shared/components/LoadingSpinner';
 import VehicleList from '../components/VehicleList';
@@ -10,12 +9,11 @@ import DeleteVehicleModal from '../components/DeleteVehicleModal';
 import type { Vehicle } from '../types/vehicle.types';
 
 const MyVehiclesPage: React.FC = () => {
-    const { user } = useAuth();
     const { 
         vehicles, 
         loading, 
         error, 
-        loadVehiclesByUser, 
+        loadVehiclesForCurrentUser, 
         deleteVehicle
     } = useVehicle();
 
@@ -25,10 +23,9 @@ const MyVehiclesPage: React.FC = () => {
     const [deleteLoading, setDeleteLoading] = useState(false);
 
     useEffect(() => {
-        if (user?.id) {
-            loadVehiclesByUser(user.id);
-        }
-    }, [user?.id, loadVehiclesByUser]);
+        // Usar el método optimizado que obtiene el profileId correctamente
+        loadVehiclesForCurrentUser();
+    }, [loadVehiclesForCurrentUser]);
 
     const handleEdit = (vehicle: Vehicle) => {
         setEditingVehicle(vehicle);
@@ -56,9 +53,8 @@ const MyVehiclesPage: React.FC = () => {
     };
 
     const handleVehicleSubmit = () => {
-        if (user?.id) {
-            loadVehiclesByUser(user.id);
-        }
+        // Recargar vehículos usando el método optimizado
+        loadVehiclesForCurrentUser();
         setEditingVehicle(null);
         setShowAddModal(false);
     };

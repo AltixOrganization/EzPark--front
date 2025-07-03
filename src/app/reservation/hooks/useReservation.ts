@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import ReservationService from '../services/reservationService';
 import { useAuth } from '../../shared/hooks/useAuth';
+import { ProfileService } from '../../profile/services/profileService';
 import type { Reservation, CreateReservationRequest, ReservationFormData } from '../types/reservation.types';
 import type { Parking } from '../../parking/types/parking.types';
 
@@ -19,7 +20,7 @@ export const useReservation = () => {
         try {
             setLoading(true);
             setError(null);
-            const data = await ReservationService.getReservationsByGuest(user.id);
+            const data = await ReservationService.getReservationsByUserAsGuest(user.id);
             setReservations(data);
         } catch (error) {
             setError(error instanceof Error ? error.message : 'Error al cargar mis reservaciones');
@@ -35,7 +36,7 @@ export const useReservation = () => {
         try {
             setLoading(true);
             setError(null);
-            const data = await ReservationService.getReservationsByHost(user.id);
+            const data = await ReservationService.getReservationsByUserAsHost(user.id);
             setReservations(data);
         } catch (error) {
             setError(error instanceof Error ? error.message : 'Error al cargar solicitudes de reserva');
@@ -52,7 +53,14 @@ export const useReservation = () => {
             setLoading(true);
             setError(null);
             
+            // Primero obtener el profileId correcto del usuario actual
+            const profile = await ProfileService.getCurrentUserProfile();
+            if (!profile) {
+                throw new Error('No se pudo obtener el perfil del usuario');
+            }
+            
             console.log('📝 Creating multiple reservations for schedules:', formData.scheduleIds);
+            console.log(`👤 Using guestId (profileId): ${profile.id} for userId: ${user.id}`);
             
             const createdReservations: Reservation[] = [];
             let failedReservations = 0;
@@ -72,7 +80,7 @@ export const useReservation = () => {
                         reservationDate: schedule.day,
                         startTime: schedule.startTime,
                         endTime: schedule.endTime,
-                        guestId: user.id,
+                        guestId: profile.id, // Usar profileId en lugar de userId
                         hostId: parking.profileId,
                         parkingId: parking.id!,
                         vehicleId: formData.vehicleId,

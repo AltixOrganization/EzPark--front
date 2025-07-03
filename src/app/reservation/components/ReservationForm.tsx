@@ -23,7 +23,7 @@ interface ReservationFormProps {
 
 const ReservationForm: React.FC<ReservationFormProps> = ({ parking, onSubmit, onCancel }) => {
     const { user } = useAuth();
-    const { vehicles, loading: vehiclesLoading, loadVehiclesByUser } = useVehicle();
+    const { vehicles, loading: vehiclesLoading, loadVehiclesForCurrentUser } = useVehicle();
     const { schedules, loading: schedulesLoading, loadAvailableSchedulesByParking } = useSchedule();
 
     const [formData, setFormData] = useState<ReservationFormData>({
@@ -37,12 +37,12 @@ const ReservationForm: React.FC<ReservationFormProps> = ({ parking, onSubmit, on
 
     useEffect(() => {
         if (user) {
-            loadVehiclesByUser(user.id);
+            loadVehiclesForCurrentUser();
         }
         if (parking.id) {
             loadAvailableSchedulesByParking(parking.id);
         }
-    }, [user, parking.id, loadVehiclesByUser, loadAvailableSchedulesByParking]);
+    }, [user, parking.id, loadVehiclesForCurrentUser, loadAvailableSchedulesByParking]);
 
     // Calcular precio total basado en horarios seleccionados
     useEffect(() => {

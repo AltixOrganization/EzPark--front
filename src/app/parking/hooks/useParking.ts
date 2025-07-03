@@ -83,7 +83,7 @@ export const useParking = (): UseParkingReturn => {
             setLoading(true);
             setError(null);
             
-            const profileId = ParkingService.getCurrentUserProfileId();
+            const profileId = await ParkingService.getCurrentUserProfileId();
             const myParkings = await ParkingService.getParkingsByProfile(profileId);
             setUserParkings(myParkings);
             
@@ -141,8 +141,10 @@ export const useParking = (): UseParkingReturn => {
 
             // Asegurarse de que el profileId esté configurado
             if (!data.profileId) {
-                data.profileId = ParkingService.getCurrentUserProfileId();
+                data.profileId = await ParkingService.getCurrentUserProfileId();
             }
+
+            console.log('📝 Creando parking con profileId:', data.profileId);
 
             const newParking = await ParkingService.createParking(data);
             

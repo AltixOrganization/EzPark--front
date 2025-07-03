@@ -12,6 +12,7 @@ import type {
     CreateModelRequest,
     UpdateModelRequest
 } from '../types/vehicle.types';
+import { ProfileService } from '../../profile/services/profileService';
 
 export class VehicleService {
     private static readonly API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
@@ -29,7 +30,45 @@ export class VehicleService {
     }
 
     static async getVehiclesByUser(userId: number): Promise<Vehicle[]> {
-        return await apiService.get<Vehicle[]>(`${this.VEHICLE_BASE_PATH}/profile/${userId}`);
+        try {
+            // Obtener todos los perfiles y buscar el que corresponde al userId
+            const profiles = await apiService.get<any[]>('/api/profiles');
+            const userProfile = profiles.find(profile => profile.userId === userId);
+            
+            if (!userProfile) {
+                console.warn(`No se encontró perfil para el usuario ${userId}`);
+                return [];
+            }
+            
+            console.log(`📤 Obteniendo vehículos para profileId: ${userProfile.id} (userId: ${userId})`);
+            
+            // Usar el profileId correcto
+            return await apiService.get<Vehicle[]>(`${this.VEHICLE_BASE_PATH}/profile/${userProfile.id}`);
+        } catch (error: any) {
+            console.error('❌ Error al obtener vehículos del usuario:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Método optimizado para obtener vehículos del usuario actual
+     * Usa ProfileService para obtener el perfil y luego los vehículos
+     */
+    static async getVehiclesForCurrentUser(): Promise<Vehicle[]> {
+        try {
+            const profile = await ProfileService.getCurrentUserProfile();
+            
+            if (!profile) {
+                console.warn('Usuario no tiene perfil creado');
+                return [];
+            }
+            
+            console.log(`📤 Obteniendo vehículos para profileId: ${profile.id}`);
+            return await apiService.get<Vehicle[]>(`${this.VEHICLE_BASE_PATH}/profile/${profile.id}`);
+        } catch (error: any) {
+            console.error('❌ Error al obtener vehículos del usuario actual:', error);
+            throw error;
+        }
     }
 
     static async createVehicle(data: CreateVehicleRequest): Promise<Vehicle> {

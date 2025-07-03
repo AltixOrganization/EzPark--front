@@ -90,6 +90,25 @@ export class ScheduleService {
             throw new Error(error.message || 'Error al actualizar el horario');
         }
     }
+
+    /**
+     * Eliminar horario
+     */
+    static async deleteSchedule(scheduleId: number): Promise<void> {
+        try {
+            console.log(`📤 Eliminando horario con ID: ${scheduleId}`);
+            await apiService.delete(`${this.BASE_PATH}/${scheduleId}`);
+            console.log('✅ Horario eliminado exitosamente');
+        } catch (error: any) {
+            console.error('❌ Error al eliminar horario:', error);
+            
+            if (error.message.includes('404')) {
+                throw new Error('Horario no encontrado');
+            }
+            
+            throw new Error(error.message || 'Error al eliminar el horario');
+        }
+    }
 }
 
 export default ScheduleService;

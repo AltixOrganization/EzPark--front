@@ -138,7 +138,7 @@ export class ProfileService {
 
     /**
      * Obtener perfil del usuario actual
-     * Asume que el profileId es igual al userId
+     * Busca el perfil por userId en la lista de todos los perfiles
      */
     static async getCurrentUserProfile(): Promise<Profile | null> {
         try {
@@ -151,10 +151,19 @@ export class ProfileService {
             const user = JSON.parse(userStr);
             const userId = user.id;
 
-            console.log(`📤 Obteniendo perfil del usuario actual (ID: ${userId})`);
+            console.log(`📤 Obteniendo perfil del usuario actual (userId: ${userId})`);
             
-            // Según tu backend, el profileId parece ser igual al userId
-            return await this.getProfileById(userId);
+            // Obtener todos los perfiles y buscar el que corresponde al userId
+            const profiles = await this.getAllProfiles();
+            const userProfile = profiles.find(profile => profile.userId === userId);
+            
+            if (!userProfile) {
+                console.warn(`No se encontró perfil para el usuario ${userId}`);
+                return null;
+            }
+            
+            console.log(`✅ Perfil encontrado: profileId ${userProfile.id} para userId ${userId}`);
+            return userProfile;
         } catch (error: any) {
             console.error('❌ Error al obtener perfil del usuario actual:', error);
             

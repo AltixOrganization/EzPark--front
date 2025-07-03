@@ -1,6 +1,7 @@
 // src/app/parking/services/parkingService.ts
 
 import { apiService } from '../../shared/utils/api';
+import { ProfileService } from '../../profile/services/profileService';
 import type {
     Parking,
     CreateParkingRequest,
@@ -349,16 +350,15 @@ export class ParkingService {    private static readonly PARKING_BASE_PATH = '/a
 
     /**
      * Obtener el perfil ID del usuario actual
+     * Usa ProfileService para obtener el profileId correcto
      */
-    static getCurrentUserProfileId(): number {
+    static async getCurrentUserProfileId(): Promise<number> {
         try {
-            const userStr = localStorage.getItem('ezpark_user');
-            if (!userStr) {
-                throw new Error('Usuario no autenticado');
+            const profile = await ProfileService.getCurrentUserProfile();
+            if (!profile) {
+                throw new Error('Usuario no tiene perfil creado');
             }
-
-            const user = JSON.parse(userStr);
-            return user.id; // Según tu backend, el profileId es igual al userId
+            return profile.id;
         } catch (error) {
             console.error('Error al obtener perfil del usuario:', error);
             throw new Error('No se pudo obtener el perfil del usuario');

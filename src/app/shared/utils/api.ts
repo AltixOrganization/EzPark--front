@@ -79,9 +79,25 @@ export class ApiService {
                 throw new Error(errorMessage);
             }
 
-            const responseData = await response.json();
-            console.log(`✅ Success response from ${endpoint}:`, responseData);
-            return responseData;
+            // Verificar si la respuesta tiene contenido para parsear
+            const contentLength = response.headers.get('content-length');
+            const contentType = response.headers.get('content-type');
+            
+            // Si la respuesta está vacía (204 No Content o content-length 0), retornar null
+            if (response.status === 204 || contentLength === '0' || !contentType?.includes('application/json')) {
+                console.log(`✅ Success response from ${endpoint}: Empty response (${response.status})`);
+                return null as T;
+            }
+
+            try {
+                const responseData = await response.json();
+                console.log(`✅ Success response from ${endpoint}:`, responseData);
+                return responseData;
+            } catch (parseError) {
+                // Si no puede parsear JSON pero la respuesta fue exitosa, asumir que es una respuesta vacía
+                console.log(`✅ Success response from ${endpoint}: Empty or non-JSON response`);
+                return null as T;
+            }
 
         } catch (error) {
             console.error(`💥 API Error (${endpoint}):`, error);

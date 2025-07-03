@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useVehicle } from '../hooks/useVehicle';
 import { useAuth } from '../../shared/hooks/useAuth';
+import { ProfileService } from '../../profile/services/profileService';
 import LoadingSpinner from '../../shared/components/LoadingSpinner';
 import type { Vehicle, CreateVehicleRequest, UpdateVehicleRequest, Model } from '../types/vehicle.types';
 
@@ -26,12 +27,32 @@ const VehicleForm: React.FC<VehicleFormProps> = ({ vehicle, onSubmit, onCancel }
     const [formData, setFormData] = useState({
         licensePlate: '',
         modelId: 0,
-        profileId: user?.id || 0,
+        profileId: 0, // Inicializar en 0, se obtendrá el correcto después
         selectedBrandId: 0
     });
 
     const [formLoading, setFormLoading] = useState(false);
     const [availableModels, setAvailableModels] = useState<Model[]>([]);
+
+    // Obtener el profileId correcto del usuario actual
+    useEffect(() => {
+        const getCurrentUserProfileId = async () => {
+            try {
+                const profile = await ProfileService.getCurrentUserProfile();
+                if (profile) {
+                    setFormData(prev => ({ ...prev, profileId: profile.id }));
+                } else {
+                    console.warn('Usuario no tiene perfil creado');
+                }
+            } catch (error) {
+                console.error('Error al obtener perfil del usuario:', error);
+            }
+        };
+
+        if (user && !vehicle) { // Solo obtener profileId para nuevos vehículos
+            getCurrentUserProfileId();
+        }
+    }, [user, vehicle]);
 
     useEffect(() => {
         loadAllBrands();
@@ -100,8 +121,20 @@ const VehicleForm: React.FC<VehicleFormProps> = ({ vehicle, onSubmit, onCancel }
             return;
         }
 
+        // Validar que se tenga un profileId válido
+        if (formData.profileId === 0) {
+            alert('Error: No se pudo obtener el perfil del usuario. Por favor, recarga la página.');
+            return;
+        }
+
         try {
             setFormLoading(true);
+            
+            console.log('📝 Datos del formulario a enviar:', {
+                licensePlate: formData.licensePlate,
+                modelId: formData.modelId,
+                profileId: formData.profileId
+            });
             
             if (vehicle) {
                 // Actualizar vehículo existente
@@ -157,7 +190,6 @@ const VehicleForm: React.FC<VehicleFormProps> = ({ vehicle, onSubmit, onCancel }
                         onChange={(e) => setFormData(prev => ({ ...prev, licensePlate: e.target.value.toUpperCase() }))}
                         className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                         placeholder="Ej: ABC-123"
-                        maxLength={8}
                         required
                     />
                 </div>

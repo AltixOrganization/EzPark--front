@@ -48,6 +48,19 @@ export const useVehicle = () => {
         }
     }, []);
 
+    const loadVehiclesForCurrentUser = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const data = await VehicleService.getVehiclesForCurrentUser();
+            setVehicles(data);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Error al cargar vehículos del usuario actual');
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     const createVehicle = useCallback(async (vehicleData: CreateVehicleRequest) => {
         try {
             setLoading(true);
@@ -302,6 +315,7 @@ export const useVehicle = () => {
         // Vehicle functions
         loadAllVehicles,
         loadVehiclesByUser,
+        loadVehiclesForCurrentUser,
         createVehicle,
         updateVehicle,
         deleteVehicle,

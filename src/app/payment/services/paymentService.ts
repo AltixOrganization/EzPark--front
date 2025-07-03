@@ -114,8 +114,19 @@ export class PaymentService {
             const parsedUser = JSON.parse(user);
             const userId = parsedUser.id;
             
-            // Primero obtenemos las reservaciones del usuario
-            const reservations = await apiService.get<any[]>(`/api/reservations/guest/${userId}`);
+            // Primero obtenemos todos los perfiles para encontrar el profileId correcto
+            const profiles = await apiService.get<any[]>('/api/profiles');
+            const userProfile = profiles.find(profile => profile.userId === userId);
+            
+            if (!userProfile) {
+                console.warn(`No se encontró perfil para el usuario ${userId}`);
+                return [];
+            }
+            
+            console.log(`📤 Obteniendo reservaciones para pagos - profileId: ${userProfile.id} (userId: ${userId})`);
+            
+            // Usar el profileId correcto para obtener las reservaciones
+            const reservations = await apiService.get<any[]>(`/api/reservations/guest/${userProfile.id}`);
             
             // Luego obtenemos los pagos de cada reservación
             const payments: Payment[] = [];

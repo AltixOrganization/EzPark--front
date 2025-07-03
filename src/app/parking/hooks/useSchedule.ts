@@ -14,12 +14,14 @@ interface UseScheduleReturn {
     loading: boolean;
     creating: boolean;
     updating: boolean;
+    deleting: boolean;
     error: string | null;
 
     // Métodos
     loadAllSchedules: () => Promise<void>;
     createSchedule: (data: CreateScheduleRequest) => Promise<boolean>;
     updateSchedule: (id: number, data: UpdateScheduleRequest) => Promise<boolean>;
+    deleteSchedule: (id: number) => Promise<boolean>;
     getScheduleById: (id: number) => Promise<Schedule | null>;
     
     // Utilidades
@@ -32,6 +34,7 @@ export const useSchedule = (): UseScheduleReturn => {
     const [loading, setLoading] = useState(false);
     const [creating, setCreating] = useState(false);
     const [updating, setUpdating] = useState(false);
+    const [deleting, setDeleting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     // Cargar todos los horarios
@@ -216,6 +219,29 @@ export const useSchedule = (): UseScheduleReturn => {
         }
     };
 
+    // Eliminar horario
+    const deleteSchedule = async (id: number): Promise<boolean> => {
+        try {
+            setDeleting(true);
+            setError(null);
+
+            console.log('🗑️ Eliminando horario con ID:', id);
+            await ScheduleService.deleteSchedule(id);
+            
+            // Remover el horario del estado local
+            setSchedules(prev => prev.filter(schedule => schedule.id !== id));
+            
+            console.log('✅ Horario eliminado exitosamente');
+            return true;
+        } catch (err: any) {
+            console.error('Error al eliminar horario:', err);
+            setError(err.message || 'Error al eliminar el horario');
+            return false;
+        } finally {
+            setDeleting(false);
+        }
+    };
+
     // Obtener horarios por estacionamiento
     const getSchedulesByParking = (parkingId: number): Schedule[] => {
         return schedules.filter(schedule => schedule.parkingId === parkingId);
@@ -232,12 +258,14 @@ export const useSchedule = (): UseScheduleReturn => {
         loading,
         creating,
         updating,
+        deleting,
         error,
 
         // Métodos
         loadAllSchedules,
         createSchedule,
         updateSchedule,
+        deleteSchedule,
         getScheduleById,
         
         // Utilidades
