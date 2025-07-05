@@ -1,5 +1,5 @@
 // Cambia la URL base - Swagger UI no es tu API
-const API_BASE_URL = 'http://localhost:8080'; // ❌ Era: 'http://localhost:8080/swagger-ui/index.html'
+const API_BASE_URL = 'http://localhost:80'; // ❌ Era: 'http://localhost:8080/swagger-ui/index.html'
 
 export class ApiService {
     private static instance: ApiService;

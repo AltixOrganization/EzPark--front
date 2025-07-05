@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useGoogleMaps } from '../../shared/providers/GoogleMapsProvider';
+import QuickReviewSummary from '../../review/components/QuickReviewSummary';
 import type { Parking } from '../types/parking.types';
 import StreetViewModal from './StreetViewModal';
 import MapsCredential from '../../credentials/MapsCredential';
@@ -267,6 +268,15 @@ const ParkingCard: React.FC<ParkingCardProps> = ({
                             </svg>
                             <span className="truncate">{parking.location.address}</span>
                         </p>
+                    </div>
+
+                    {/* Reviews Summary */}
+                    <div className="mb-3">
+                        <QuickReviewSummary 
+                            parkingId={parking.id!} 
+                            showDetails={true}
+                            className="justify-start"
+                        />
                     </div>
 
                     {/* Specifications */}

@@ -8,6 +8,7 @@ import { useAuth } from "../../shared/hooks/useAuth";
 import { useReservation } from "../../reservation/hooks/useReservation";
 import ReservationForm from "../../reservation/components/ReservationForm";
 import MultipleReservationResult from "../../reservation/components/MultipleReservationResult";
+import ReviewsManager from "../../review/components/ReviewsManager";
 import type { ReservationFormData } from "../../reservation/types/reservation.types";
 import type { Parking } from '../types/parking.types';
 import type { Reservation } from '../../reservation/types/reservation.types';
@@ -42,6 +43,7 @@ const ParkingDetailsModal: React.FC<ParkingDetailsModalProps> = ({
     const [showReservationForm, setShowReservationForm] = useState(false);
     const [createdReservations, setCreatedReservations] = useState<Reservation[]>([]);
     const [showReservationResult, setShowReservationResult] = useState(false);
+    const [activeTab, setActiveTab] = useState<'details' | 'reviews'>('details');
     
     const handleReservationSubmit = async (formData: ReservationFormData) => {
         try {
@@ -217,8 +219,35 @@ const ParkingDetailsModal: React.FC<ParkingDetailsModalProps> = ({
                     </button>
                 </div>
 
+                {/* Tabs */}
+                <div className="border-b border-gray-200">
+                    <nav className="flex space-x-8 px-6" aria-label="Tabs">
+                        <button
+                            onClick={() => setActiveTab('details')}
+                            className={`py-3 px-1 border-b-2 font-medium text-sm ${
+                                activeTab === 'details'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            }`}
+                        >
+                            Detalles
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('reviews')}
+                            className={`py-3 px-1 border-b-2 font-medium text-sm ${
+                                activeTab === 'reviews'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            }`}
+                        >
+                            Reseñas
+                        </button>
+                    </nav>
+                </div>
+
                 {/* Content */}
                 <div className="p-6">
+                    {activeTab === 'details' ? (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Información principal */}
                         <div className="space-y-6">
@@ -420,6 +449,14 @@ const ParkingDetailsModal: React.FC<ParkingDetailsModalProps> = ({
                             )}
                         </div>
                     </div>
+                    ) : (
+                        /* Reviews Tab */
+                        <ReviewsManager
+                            parkingId={parking.id!}
+                            parkingName={`${parking.location.district}, ${parking.location.city}`}
+                            allowNewReview={!isOwner}
+                        />
+                    )}
 
                     {/* Botones de acción */}
                     <div className="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200">                        <button
