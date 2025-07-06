@@ -37,6 +37,14 @@ const ReviewsManager: React.FC<ReviewsManagerProps> = ({
     const { profile: currentProfile } = useProfile();
     const [showAddForm, setShowAddForm] = useState(false);
 
+    // Debug logging
+    console.log('ReviewsManager - Current Profile Debug:', {
+        currentProfile,
+        currentProfileId: currentProfile?.id,
+        isAuthenticated: !!currentProfile,
+        parkingId
+    });
+
     useEffect(() => {
         loadReviewsByParking(parkingId);
         loadParkingStats(parkingId);

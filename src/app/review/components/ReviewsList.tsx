@@ -4,6 +4,7 @@ import React from 'react';
 import ReviewCard from './ReviewCard';
 import StarRating from './StarRating';
 import LoadingSpinner from '../../shared/components/LoadingSpinner';
+import useReviewerProfiles from '../hooks/useReviewerProfiles';
 import type { Review, ReviewStats } from '../types/review.types';
 
 interface ReviewsListProps {
@@ -27,56 +28,82 @@ const ReviewsList: React.FC<ReviewsListProps> = ({
     emptyMessage = "No hay reseñas disponibles",
     showStats = true
 }) => {
+    // Hook para cargar perfiles de reviewers
+    const { getReviewerName } = useReviewerProfiles(reviews);
+
+    // Debug logging
+    console.log('ReviewsList - stats:', stats);
+    console.log('ReviewsList - showStats:', showStats);
+    console.log('ReviewsList - reviews.length:', reviews.length);
+    console.log('ReviewsList - currentProfileId:', currentProfileId);
+
     if (loading) {
         return <LoadingSpinner />;
     }
 
     return (
         <div className="space-y-6">
-            {/* Stats Section */}
-            {showStats && stats && stats.totalReviews > 0 && (
+            {/* Enhanced Stats Section */}
+            {showStats && reviews.length > 0 && (
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                        Resumen de Reseñas
-                    </h3>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Overall Rating */}
-                        <div className="text-center">
-                            <div className="text-3xl font-bold text-gray-900 mb-2">
-                                {stats.averageRating.toFixed(1)}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        {/* Overall Rating Display */}
+                        <div className="text-center lg:text-left">
+                            <div className="text-5xl font-bold text-gray-900 mb-2">
+                                {stats ? stats.averageRating.toFixed(1) : (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)}
                             </div>
                             <StarRating 
-                                rating={stats.averageRating} 
+                                rating={stats ? stats.averageRating : reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length} 
                                 size="lg" 
                                 showValue={false}
                             />
-                            <p className="text-sm text-gray-600 mt-2">
-                                Basado en {stats.totalReviews} reseña{stats.totalReviews !== 1 ? 's' : ''}
-                            </p>
+                            <div className="mt-2">
+                                <p className="text-sm font-medium text-gray-700">
+                                    Calificación promedio
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                    Basado en {stats ? stats.totalReviews : reviews.length} review{(stats ? stats.totalReviews : reviews.length) !== 1 ? 's' : ''}
+                                </p>
+                            </div>
                         </div>
 
                         {/* Rating Distribution */}
-                        <div className="space-y-2">
-                            {[5, 4, 3, 2, 1].map(rating => {
-                                const count = stats.ratingDistribution[rating.toString()] || 0;
-                                const percentage = stats.totalReviews > 0 ? (count / stats.totalReviews) * 100 : 0;
-                                
-                                return (
-                                    <div key={rating} className="flex items-center space-x-3">
-                                        <span className="text-sm w-8">{rating}★</span>
-                                        <div className="flex-1 bg-gray-200 rounded-full h-2">
-                                            <div 
-                                                className="bg-yellow-400 h-2 rounded-full transition-all duration-300"
-                                                style={{ width: `${percentage}%` }}
-                                            />
+                        <div className="lg:col-span-2">
+                            <h4 className="text-sm font-medium text-gray-700 mb-4">
+                                Distribución de calificaciones
+                            </h4>
+                            <div className="space-y-3">
+                                {[5, 4, 3, 2, 1].map(rating => {
+                                    let count = 0;
+                                    let totalReviews = 0;
+                                    
+                                    if (stats && stats.ratingDistribution) {
+                                        count = stats.ratingDistribution[rating.toString()] || 0;
+                                        totalReviews = stats.totalReviews;
+                                    } else {
+                                        // Calculate from reviews data
+                                        count = reviews.filter(r => r.rating === rating).length;
+                                        totalReviews = reviews.length;
+                                    }
+                                    
+                                    const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
+                                    
+                                    return (
+                                        <div key={rating} className="flex items-center space-x-3">
+                                            <span className="text-sm font-medium w-4 text-right">{rating}</span>
+                                            <div className="flex-1 bg-gray-200 rounded-full h-3 relative overflow-hidden">
+                                                <div 
+                                                    className="bg-blue-500 h-3 rounded-full transition-all duration-700 ease-out"
+                                                    style={{ width: `${percentage}%` }}
+                                                />
+                                            </div>
+                                            <span className="text-sm font-medium text-gray-700 w-8 text-right">
+                                                {count}
+                                            </span>
                                         </div>
-                                        <span className="text-sm text-gray-600 w-8">
-                                            {count}
-                                        </span>
-                                    </div>
-                                );
-                            })}
+                                    );
+                                })}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -108,6 +135,7 @@ const ReviewsList: React.FC<ReviewsListProps> = ({
                             key={review.id}
                             review={review}
                             currentProfileId={currentProfileId}
+                            reviewerName={getReviewerName(review.profileId)}
                             onEdit={onEdit}
                             onDelete={onDelete}
                         />

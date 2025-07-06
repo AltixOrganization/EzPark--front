@@ -23,6 +23,7 @@ export { default as ReviewForm } from './components/ReviewForm';
 export { default as ReviewsList } from './components/ReviewsList';
 export { default as ReviewsManager } from './components/ReviewsManager';
 export { default as QuickReviewSummary } from './components/QuickReviewSummary';
+export { default as ReviewStatsCard } from './components/ReviewStatsCard';
 
 // Pages
 export { default as ParkingReviewsPage } from './pages/ParkingReviewsPage';

@@ -38,12 +38,12 @@ const QuickReviewSummary: React.FC<QuickReviewSummaryProps> = ({
             />
             {showDetails ? (
                 <div className="text-xs text-gray-600">
-                    <span className="font-medium">{stats.averageRating.toFixed(1)}</span>
+                    <span className="font-semibold text-gray-900">{stats.averageRating.toFixed(1)}</span>
                     <span className="mx-1">·</span>
-                    <span>{stats.totalReviews} reseña{stats.totalReviews !== 1 ? 's' : ''}</span>
+                    <span>{stats.totalReviews} review{stats.totalReviews !== 1 ? 's' : ''}</span>
                 </div>
             ) : (
-                <span className="text-xs text-gray-600">
+                <span className="text-xs text-gray-600 font-medium">
                     {stats.averageRating.toFixed(1)} ({stats.totalReviews})
                 </span>
             )}

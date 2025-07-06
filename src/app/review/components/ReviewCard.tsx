@@ -1,15 +1,17 @@
 // src/app/review/components/ReviewCard.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import StarRating from './StarRating';
 import ReviewForm from './ReviewForm';
+import ProfileService, { type Profile } from '../../profile/services/profileService';
 import type { Review } from '../types/review.types';
 
 interface ReviewCardProps {
     review: Review;
     currentProfileId?: number;
+    reviewerName?: string; // Nuevo prop opcional
     onEdit?: (reviewId: number, formData: { rating: number; comment: string }) => Promise<boolean>;
     onDelete?: (reviewId: number) => Promise<boolean>;
     showActions?: boolean;
@@ -18,18 +20,74 @@ interface ReviewCardProps {
 const ReviewCard: React.FC<ReviewCardProps> = ({
     review,
     currentProfileId,
+    reviewerName,
     onEdit,
     onDelete,
     showActions = true
 }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [reviewerProfile, setReviewerProfile] = useState<Profile | null>(null);
+    const [loadingProfile, setLoadingProfile] = useState(false);
+
+    // Debug logging
+    console.log('ReviewCard - Debug:', {
+        reviewId: review.id,
+        reviewProfileId: review.profileId,
+        currentProfileId,
+        canEdit: currentProfileId === review.profileId,
+        showActions,
+        reviewerName
+    });
 
     const canEdit = currentProfileId === review.profileId;
     const timeAgo = formatDistanceToNow(new Date(review.createdAt), { 
         addSuffix: true, 
         locale: es 
     });
+
+    // Obtener información del perfil del reviewer solo si no se proporcionó reviewerName
+    useEffect(() => {
+        if (reviewerName) {
+            // Si ya tenemos el nombre del reviewer, no necesitamos cargar el perfil
+            return;
+        }
+
+        const loadReviewerProfile = async () => {
+            if (!review.profileId) return;
+            
+            try {
+                setLoadingProfile(true);
+                const profile = await ProfileService.getProfileById(review.profileId);
+                setReviewerProfile(profile);
+            } catch (error) {
+                console.error('Error al cargar perfil del reviewer:', error);
+                // No establecer error, solo usar fallback
+                setReviewerProfile(null);
+            } finally {
+                setLoadingProfile(false);
+            }
+        };
+
+        loadReviewerProfile();
+    }, [review.profileId, reviewerName]);
+
+    const getReviewerDisplayName = () => {
+        // Si se proporcionó reviewerName, usarlo directamente
+        if (reviewerName) {
+            return reviewerName;
+        }
+
+        if (loadingProfile) {
+            return 'Cargando...';
+        }
+        
+        if (reviewerProfile) {
+            return `${reviewerProfile.firstName} ${reviewerProfile.lastName}`;
+        }
+        
+        return `Usuario #${review.profileId}`;
+    };
 
     const handleEdit = async (formData: { rating: number; comment: string }): Promise<boolean> => {
         if (onEdit) {
@@ -86,7 +144,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({
                     </div>
                     <div>
                         <p className="text-sm font-medium text-gray-900">
-                            Usuario #{review.profileId}
+                            {getReviewerDisplayName()}
                         </p>
                         <p className="text-xs text-gray-500">
                             {timeAgo}
