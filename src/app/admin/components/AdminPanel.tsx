@@ -38,8 +38,7 @@ const AdminPanel: React.FC = () => {
         try {
             setLoading(true);
             setError('');
-            // Tu backend: GET /api/v1/users (requiere ROLE_ADMIN)
-            const usersData = await apiService.get<User[]>('/api/v1/users');
+            const usersData = await apiService.get<User[]>('/api/users');
             setUsers(usersData);        } catch (err: unknown) {
             console.error('Error al cargar usuarios:', err);
             const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
@@ -70,8 +69,7 @@ const AdminPanel: React.FC = () => {
 
     const fetchUserDetails = async (userId: number) => {
         try {
-            // Tu backend: GET /api/v1/users/{userId}
-            const user = await apiService.get<User>(`/api/v1/users/${userId}`);
+            const user = await apiService.get<User>(`/api/users/${userId}`);
             setSelectedUser(user);        } catch (err: unknown) {
             console.error('Error al cargar detalles del usuario:', err);
             const errorMessage = err instanceof Error ? err.message : 'Error desconocido';

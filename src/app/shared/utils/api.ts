@@ -1,5 +1,5 @@
 // Cambia la URL base - Swagger UI no es tu API
-const API_BASE_URL = 'http://localhost:80'; // ❌ Era: 'http://localhost:8080/swagger-ui/index.html'
+const API_BASE_URL = 'http://18.225.149.199'; // ❌ Era: 'http://localhost:8080/swagger-ui/index.html'
 
 export class ApiService {
     private static instance: ApiService;
@@ -49,11 +49,12 @@ export class ApiService {
                 ok: response.ok
             });
 
-            if (!response.ok) {                let errorData;
+            if (!response.ok) {
+                let errorData;
                 try {
                     errorData = await response.json();
                     console.error(`❌ Error data from ${endpoint}:`, errorData);
-                      // Log details array specifically if it exists
+                    // Log details array specifically if it exists
                     if (errorData.details && Array.isArray(errorData.details)) {
                         console.error(`🔍 Error details:`, errorData.details);
                         errorData.details.forEach((detail: any, index: number) => {
@@ -67,7 +68,7 @@ export class ApiService {
 
                 // Si el backend devuelve un mensaje de error específico, usarlo
                 let errorMessage = `Error ${response.status}: ${response.statusText}`;
-                
+
                 if (errorData.message) {
                     errorMessage = errorData.message;
                 } else if (errorData.details && Array.isArray(errorData.details)) {
@@ -82,7 +83,7 @@ export class ApiService {
             // Verificar si la respuesta tiene contenido para parsear
             const contentLength = response.headers.get('content-length');
             const contentType = response.headers.get('content-type');
-            
+
             // Si la respuesta está vacía (204 No Content o content-length 0), retornar null
             if (response.status === 204 || contentLength === '0' || !contentType?.includes('application/json')) {
                 console.log(`✅ Success response from ${endpoint}: Empty response (${response.status})`);
@@ -101,17 +102,17 @@ export class ApiService {
 
         } catch (error) {
             console.error(`💥 API Error (${endpoint}):`, error);
-            
+
             // Si es un error de red
             if (error instanceof TypeError && error.message.includes('fetch')) {
                 throw new Error('Error de conexión. Verifica tu conexión a internet.');
             }
-            
+
             // Si es nuestro error personalizado, mantenerlo
             if (error instanceof Error) {
                 throw error;
             }
-            
+
             // Error genérico
             throw new Error('Ocurrió un error inesperado');
         }

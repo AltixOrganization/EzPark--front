@@ -77,7 +77,14 @@ export const useReview = (): UseReviewReturn => {
             
         } catch (err: any) {
             console.error('Error loading parking reviews:', err);
-            setError(err.message || 'Error al cargar las reseñas del estacionamiento');
+            
+            // No mostrar error si es 404 (es normal no tener reseñas)
+            if (err.message && err.message.includes('404')) {
+                console.log('No reviews found for parking (normal when no reviews exist)');
+                setReviews([]);
+            } else {
+                setError(err.message || 'Error al cargar las reseñas del estacionamiento');
+            }
         } finally {
             setLoading(false);
         }
@@ -110,7 +117,14 @@ export const useReview = (): UseReviewReturn => {
             
         } catch (err: any) {
             console.error('Error loading parking stats:', err);
-            setError(err.message || 'Error al cargar las estadísticas');
+            
+            // No mostrar error si es 404 (es normal no tener estadísticas sin reseñas)
+            if (err.message && err.message.includes('404')) {
+                console.log('No stats found for parking (normal when no reviews exist)');
+                setStats(null);
+            } else {
+                setError(err.message || 'Error al cargar las estadísticas');
+            }
         }
     }, []);
 

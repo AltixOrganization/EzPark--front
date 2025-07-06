@@ -9,7 +9,7 @@ import type {
 } from '../types/review.types';
 
 export class ReviewService {
-    private static readonly BASE_PATH = '/api/v1/reviews';
+    private static readonly BASE_PATH = '/api/reviews';
 
     /**
      * Create a new review
