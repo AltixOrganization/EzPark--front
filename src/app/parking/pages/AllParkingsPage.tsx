@@ -28,7 +28,7 @@ const AllParkingsPage: React.FC = () => {
 
     useEffect(() => {
         loadAllParkings();
-    }, []);
+    }, [loadAllParkings]);
 
     // Handlers
     const handleViewParking = (parking: Parking) => {
@@ -132,35 +132,35 @@ const AllParkingsPage: React.FC = () => {
                 )}
 
                 {/* Barra de búsqueda y filtros */}
-                <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+                <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-8">
                     {/* Búsqueda por ubicación */}
                     <div className="mb-6">
                         <label htmlFor="search-location" className="block text-sm font-medium text-gray-700 mb-2">
                             Buscar por ubicación
                         </label>
-                        <div className="flex space-x-3">
+                        <div className="flex flex-col sm:flex-row gap-3">
                             <input
                                 type="text"
                                 id="search-location"
                                 value={searchLocation}
                                 onChange={(e) => setSearchLocation(e.target.value)}
                                 placeholder="Ej: Miraflores, San Isidro, Lima Centro..."
-                                className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-0"
                             />
                             <button
                                 onClick={handleSearchLocation}
-                                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-200 flex items-center space-x-2"
+                                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-200 flex items-center justify-center space-x-2 whitespace-nowrap"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
-                                <span>Buscar</span>
+                                <span className="hidden sm:inline">Buscar</span>
                             </button>
                         </div>
                     </div>
 
                     {/* Filtros y ordenamiento */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         {/* Filtro de precio categórico */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Rango de precio</label>
@@ -243,22 +243,22 @@ const AllParkingsPage: React.FC = () => {
 
                 {/* Estadísticas de búsqueda */}
                 <div className="mb-6 bg-blue-50 rounded-lg p-4">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-center">
                         <div>
-                            <p className="text-2xl font-bold text-blue-600">{searchStats.filtered}</p>
-                            <p className="text-sm text-gray-600">Resultados</p>
+                            <p className="text-xl md:text-2xl font-bold text-blue-600">{searchStats.filtered}</p>
+                            <p className="text-xs md:text-sm text-gray-600">Resultados</p>
                         </div>
                         <div>
-                            <p className="text-2xl font-bold text-green-600">{searchStats.available}</p>
-                            <p className="text-sm text-gray-600">Disponibles</p>
+                            <p className="text-xl md:text-2xl font-bold text-green-600">{searchStats.available}</p>
+                            <p className="text-xs md:text-sm text-gray-600">Disponibles</p>
                         </div>
                         <div>
-                            <p className="text-2xl font-bold text-purple-600">S/ {searchStats.avgPrice}</p>
-                            <p className="text-sm text-gray-600">Precio promedio</p>
+                            <p className="text-xl md:text-2xl font-bold text-purple-600">S/ {searchStats.avgPrice}</p>
+                            <p className="text-xs md:text-sm text-gray-600">Precio promedio</p>
                         </div>
                         <div>
-                            <p className="text-2xl font-bold text-orange-600">{searchStats.total}</p>
-                            <p className="text-sm text-gray-600">Total registrados</p>
+                            <p className="text-xl md:text-2xl font-bold text-orange-600">{searchStats.total}</p>
+                            <p className="text-xs md:text-sm text-gray-600">Total registrados</p>
                         </div>
                     </div>
                 </div>
@@ -298,7 +298,7 @@ const AllParkingsPage: React.FC = () => {
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
                             {filteredAndSortedParkings.map((parking) => (
                                 <ParkingCard
                                     key={parking.id}

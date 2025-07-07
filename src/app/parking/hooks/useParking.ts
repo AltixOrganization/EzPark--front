@@ -1,6 +1,6 @@
 // src/app/parking/hooks/useParking.ts
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ParkingService from '../services/parkingService';
 import type { 
     Parking, 
@@ -56,7 +56,7 @@ export const useParking = (): UseParkingReturn => {
     // MÉTODOS DE CARGA DE DATOS
     // ===============================
 
-    const loadAllParkings = async () => {
+    const loadAllParkings = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -71,9 +71,9 @@ export const useParking = (): UseParkingReturn => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
-    const loadUserParkings = async () => {
+    const loadUserParkings = useCallback(async () => {
         if (!isAuthenticated || !user) {
             setUserParkings([]);
             return;
@@ -94,9 +94,9 @@ export const useParking = (): UseParkingReturn => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [isAuthenticated, user]);
 
-    const loadParkingById = async (id: number) => {
+    const loadParkingById = useCallback(async (id: number) => {
         try {
             setLoading(true);
             setError(null);
@@ -111,9 +111,9 @@ export const useParking = (): UseParkingReturn => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
-    const searchNearbyParkings = async (location: MapLocation) => {
+    const searchNearbyParkings = useCallback(async (location: MapLocation) => {
         try {
             setLoading(true);
             setError(null);
@@ -128,7 +128,7 @@ export const useParking = (): UseParkingReturn => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     // ===============================
     // MÉTODOS DE CRUD
@@ -222,12 +222,12 @@ export const useParking = (): UseParkingReturn => {
         setError(null);
     };
 
-    const refreshData = async () => {
+    const refreshData = useCallback(async () => {
         await Promise.all([
             loadAllParkings(),
             loadUserParkings()
         ]);
-    };
+    }, [loadAllParkings, loadUserParkings]);
 
     // ===============================
     // EFECTOS
@@ -238,7 +238,7 @@ export const useParking = (): UseParkingReturn => {
         if (isAuthenticated) {
             loadUserParkings();
         }
-    }, [isAuthenticated, user]);
+    }, [isAuthenticated, user, loadUserParkings]);
 
     return {
         // Estado

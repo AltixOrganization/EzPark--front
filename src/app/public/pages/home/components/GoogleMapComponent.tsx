@@ -9,8 +9,8 @@ import type { Parking } from "../../../../parking/types/parking.types";
 import './home.css';
 
 const containerStyle = {
-    width: "78%",
-    height: "770px",
+    width: "100%",
+    height: "100%",
     borderRadius: "27px",
 };
 
@@ -236,17 +236,18 @@ const MapWithSearchComponent: React.FC = () => {
                     )}
 
                     {/* Botón para obtener/re-centrar ubicación */}
-                    <div className="flex space-x-2 mb-3">
+                    <div className="flex flex-col sm:flex-row gap-2 mb-3">
                         {!userLocation && !locationLoading && (
                             <button
                                 onClick={requestLocation}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 text-sm"
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2 text-sm"
                             >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
-                                <span>Usar mi ubicación</span>
+                                <span className="hidden sm:inline">Usar mi ubicación</span>
+                                <span className="sm:hidden">Mi ubicación</span>
                             </button>
                         )}
 
@@ -261,14 +262,15 @@ const MapWithSearchComponent: React.FC = () => {
                                     setMarkerPosition(userCenter);
                                     console.log('📍 Mapa re-centrado en ubicación del usuario');
                                 }}
-                                className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2 text-sm"
+                                className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center space-x-2 text-sm"
                                 title="Volver a mi ubicación"
                             >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2l9 4.9V17L12 22l-9-5V6.9L12 2z" />
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 13a2 2 0 100-4 2 2 0 000 4z" />
                                 </svg>
-                                <span>Mi ubicación</span>
+                                <span className="hidden sm:inline">Mi ubicación</span>
+                                <span className="sm:hidden">Ubicación</span>
                             </button>
                         )}
                     </div>
@@ -314,12 +316,7 @@ const MapWithSearchComponent: React.FC = () => {
                             ref={inputRef}
                             type="text"
                             placeholder="Busca una dirección"
-                            style={{
-                                width: "90%",
-                                height: "40px",
-                                fontSize: "16px",
-                                borderRadius: "10px",
-                            }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             onKeyDown={handleManualSearch}
                         />
                     </Autocomplete>
