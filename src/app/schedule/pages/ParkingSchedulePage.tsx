@@ -13,7 +13,7 @@ const ParkingSchedulePage: React.FC = () => {
         loading,
         error,
         loadSchedulesByParking,
-        deleteSchedule
+        // deleteSchedule // Comentado temporalmente
     } = useSchedule();
 
     const [parkingInfo, setParkingInfo] = useState<{
@@ -43,15 +43,16 @@ const ParkingSchedulePage: React.FC = () => {
         }
     };
 
-    const handleDeleteSchedule = async (scheduleId: number) => {
-        try {
-            await deleteSchedule(scheduleId);
-            handleScheduleUpdate();
-        } catch (error) {
-            console.error('Error deleting schedule:', error);
-            alert('Error al eliminar horario: ' + (error instanceof Error ? error.message : 'Error desconocido'));
-        }
-    };
+    // Función para eliminar un horario
+    // const handleDeleteSchedule = async (scheduleId: number) => {
+    //     try {
+    //         await deleteSchedule(scheduleId);
+    //         handleScheduleUpdate();
+    //     } catch (error) {
+    //         console.error('Error deleting schedule:', error);
+    //         alert('Error al eliminar horario: ' + (error instanceof Error ? error.message : 'Error desconocido'));
+    //     }
+    // };
 
     if (!parkingId) {
         return (
