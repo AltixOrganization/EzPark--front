@@ -15,7 +15,6 @@ import type {
 import { ProfileService } from '../../profile/services/profileService';
 
 export class VehicleService {
-    private static readonly API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
     private static readonly VEHICLE_BASE_PATH = '/api/vehicles-management/vehicles';
     private static readonly BRAND_BASE_PATH = '/api/vehicles-management/brands';
     private static readonly MODEL_BASE_PATH = '/api/vehicles-management/models';
@@ -83,43 +82,9 @@ export class VehicleService {
         try {
             console.log(`📤 Eliminando vehículo con ID: ${id}`);
 
-            // Usar fetch directamente para manejar la respuesta de texto
-            const token = localStorage.getItem('ezpark_token');
-            const url = `${this.API_BASE_URL}${this.VEHICLE_BASE_PATH}/${id}`;
+            await apiService.delete<void>(`${this.VEHICLE_BASE_PATH}/${id}`);
 
-            const response = await fetch(url, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(token && { 'Authorization': `Bearer ${token}` })
-                }
-            });
-
-            console.log(`📡 Response from delete ${id}:`, {
-                status: response.status,
-                statusText: response.statusText,
-                ok: response.ok
-            });
-
-            if (!response.ok) {
-                let errorMessage = `Error ${response.status}: ${response.statusText}`;
-
-                try {
-                    const errorData = await response.json();
-                    if (errorData.message) {
-                        errorMessage = errorData.message;
-                    }
-                } catch (parseError) {
-                    // Si no es JSON, usar el statusText
-                    errorMessage = response.statusText || 'Error al eliminar vehículo';
-                }
-
-                throw new Error(errorMessage);
-            }
-
-            // El backend devuelve texto plano, no JSON, así que solo verificamos que sea exitoso
-            const responseText = await response.text();
-            console.log('✅ Vehículo eliminado exitosamente:', responseText);
+            console.log('✅ Vehículo eliminado exitosamente');
 
         } catch (error: any) {
             console.error('❌ Error al eliminar vehículo:', error);

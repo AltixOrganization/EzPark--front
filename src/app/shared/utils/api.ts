@@ -1,6 +1,6 @@
 // Cambia la URL base - Swagger UI no es tu API
-const API_BASE_URL = 'http://18.225.149.199'; // ❌ Era: 'http://localhost:8080/swagger-ui/index.html'
-
+// En tu archivo .env o variables de Railway
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://18.225.149.199';
 export class ApiService {
     private static instance: ApiService;
 

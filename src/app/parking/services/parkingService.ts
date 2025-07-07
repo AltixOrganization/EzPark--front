@@ -11,9 +11,8 @@ import type {
     MapLocation
 } from '../types/parking.types';
 
-const API_BASE_URL = 'http://localhost:8080'; // Agregamos esta constante
-
-export class ParkingService {    private static readonly PARKING_BASE_PATH = '/api/parking-management/parking';
+export class ParkingService {
+    private static readonly PARKING_BASE_PATH = '/api/parking-management/parking';
     private static readonly SCHEDULE_BASE_PATH = '/api/parking-management/schedule';
 
     // ===============================
@@ -155,43 +154,9 @@ export class ParkingService {    private static readonly PARKING_BASE_PATH = '/a
         try {
             console.log(`📤 Eliminando estacionamiento con ID: ${parkingId}`);
 
-            // Usar fetch directamente para manejar la respuesta de texto
-            const token = localStorage.getItem('ezpark_token');
-            const url = `${API_BASE_URL}${this.PARKING_BASE_PATH}/delete/${parkingId}`;
+            await apiService.delete<void>(`${this.PARKING_BASE_PATH}/delete/${parkingId}`);
 
-            const response = await fetch(url, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(token && { 'Authorization': `Bearer ${token}` })
-                }
-            });
-
-            console.log(`📡 Response from delete ${parkingId}:`, {
-                status: response.status,
-                statusText: response.statusText,
-                ok: response.ok
-            });
-
-            if (!response.ok) {
-                let errorMessage = `Error ${response.status}: ${response.statusText}`;
-
-                try {
-                    const errorData = await response.json();
-                    if (errorData.message) {
-                        errorMessage = errorData.message;
-                    }
-                } catch (parseError) {
-                    // Si no es JSON, usar el statusText
-                    errorMessage = response.statusText || 'Error al eliminar estacionamiento';
-                }
-
-                throw new Error(errorMessage);
-            }
-
-            // El backend devuelve texto plano, no JSON, así que solo verificamos que sea exitoso
-            const responseText = await response.text();
-            console.log('✅ Estacionamiento eliminado exitosamente:', responseText);
+            console.log('✅ Estacionamiento eliminado exitosamente');
 
         } catch (error: any) {
             console.error('❌ Error al eliminar estacionamiento:', error);
