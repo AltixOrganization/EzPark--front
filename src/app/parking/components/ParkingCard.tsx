@@ -319,20 +319,10 @@ const ParkingCard: React.FC<ParkingCardProps> = ({
 
                     {/* Action Buttons */}
                     <div className="flex space-x-2">
-                        {!isOwner && onReserve && (
-                            <button
-                                onClick={onReserve}
-                                disabled={parking.space === 0}
-                                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed text-sm font-medium"
-                            >
-                                {parking.space === 0 ? 'No disponible' : 'Reservar'}
-                            </button>
-                        )}
-                        
                         {!isOwner && onView && (
                             <button
                                 onClick={onView}
-                                className="flex-1 border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition duration-200 text-sm font-medium"
+                                className="flex-1 border bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed text-sm font-medium"
                             >
                                 Ver detalles
                             </button>

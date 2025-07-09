@@ -133,31 +133,6 @@ const AllParkingsPage: React.FC = () => {
 
                 {/* Barra de búsqueda y filtros */}
                 <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-8">
-                    {/* Búsqueda por ubicación */}
-                    <div className="mb-6">
-                        <label htmlFor="search-location" className="block text-sm font-medium text-gray-700 mb-2">
-                            Buscar por ubicación
-                        </label>
-                        <div className="flex flex-col sm:flex-row gap-3">
-                            <input
-                                type="text"
-                                id="search-location"
-                                value={searchLocation}
-                                onChange={(e) => setSearchLocation(e.target.value)}
-                                placeholder="Ej: Miraflores, San Isidro, Lima Centro..."
-                                className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-0"
-                            />
-                            <button
-                                onClick={handleSearchLocation}
-                                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-200 flex items-center justify-center space-x-2 whitespace-nowrap"
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                                <span className="hidden sm:inline">Buscar</span>
-                            </button>
-                        </div>
-                    </div>
 
                     {/* Filtros y ordenamiento */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -314,7 +289,7 @@ const AllParkingsPage: React.FC = () => {
 
                 {/* Call to action para propietarios */}
                 {parkings.length > 0 && (
-                    <div className="mt-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-8 text-center text-white">
+                    <div className="mt-12 bg-blue-600 rounded-lg p-8 text-center text-white">
                         <h2 className="text-2xl font-bold mb-4">¿Tienes un espacio de estacionamiento?</h2>
                         <p className="mb-6 text-blue-100">
                             Únete a nuestra comunidad y comienza a generar ingresos con tu espacio disponible.

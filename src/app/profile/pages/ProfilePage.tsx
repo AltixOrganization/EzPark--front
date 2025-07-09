@@ -1,13 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../shared/hooks/useAuth';
 import { useProfile } from '../hooks/useProfile';
 import LoadingSpinner from '../../shared/components/LoadingSpinner';
 import EditProfileModal from '../components/EditProfileModal';
+import { useParking } from '../../parking/hooks/useParking';
+import { useVehicle } from '../../vehicle/hooks/useVehicle';
+import { ReservationService } from '../../reservation/services/reservationService';
+import { ReviewService } from '../../review/services/reviewService';
 
 const ProfilePage: React.FC = () => {
     const { user } = useAuth();
     const { profile, loading, error, hasProfile } = useProfile();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+    // Estadísticas adicionales
+    const { userParkings, loadUserParkings } = useParking();
+    const { vehicles, loadVehiclesForCurrentUser } = useVehicle();
+    const [reservationsCount, setReservationsCount] = useState<number>(0);
+    const [averageRating, setAverageRating] = useState<number | null>(null);
+
+    useEffect(() => {
+        if (hasProfile && profile) {
+            loadUserParkings();
+            loadVehiclesForCurrentUser();
+            // Cargar reservas realizadas
+            ReservationService.getReservationsForCurrentUserAsGuest()
+                .then(res => setReservationsCount(res.length))
+                .catch(() => setReservationsCount(0));
+            // Cargar reviews promedio
+            ReviewService.getReviewsByProfile(profile.id)
+                .then(reviews => {
+                    if (reviews.length > 0) {
+                        const avg = (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length);
+                        setAverageRating(Number(avg.toFixed(2)));
+                    } else {
+                        setAverageRating(null);
+                    }
+                })
+                .catch(() => setAverageRating(null));
+        }
+    }, [hasProfile, profile, loadUserParkings, loadVehiclesForCurrentUser]);
 
     if (loading) {
         return <LoadingSpinner fullScreen text="Cargando perfil..." />;
@@ -213,22 +245,26 @@ const ProfilePage: React.FC = () => {
                         </svg>
                         Actividad en EzPark
                     </h2>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div className="text-center p-4 bg-gray-50 rounded-lg">
-                            <p className="text-2xl font-bold text-blue-600">0</p>
+                            <p className="text-2xl font-bold text-blue-600">{reservationsCount}</p>
                             <p className="text-sm text-gray-600">Reservas realizadas</p>
                         </div>
                         <div className="text-center p-4 bg-gray-50 rounded-lg">
-                            <p className="text-2xl font-bold text-green-600">0</p>
+                            <p className="text-2xl font-bold text-green-600">{userParkings.length}</p>
                             <p className="text-sm text-gray-600">Garajes publicados</p>
                         </div>
                         <div className="text-center p-4 bg-gray-50 rounded-lg">
-                            <p className="text-2xl font-bold text-purple-600">⭐</p>
+                            <p className="text-2xl font-bold text-purple-600">{vehicles.length}</p>
+                            <p className="text-sm text-gray-600">Vehículos registrados</p>
+                        </div>
+                        <div className="text-center p-4 bg-gray-50 rounded-lg">
+                            <p className="text-2xl font-bold text-yellow-500">{averageRating !== null ? `${averageRating} ⭐` : '—'}</p>
                             <p className="text-sm text-gray-600">Calificación promedio</p>
                         </div>
                     </div>
                 </div>
+
             </div>
 
             {/* Modal de edición */}
