@@ -21,6 +21,13 @@ import PaymentHistoryPage from "./app/payment/pages/PaymentHistoryPage.tsx";
 import PaymentPage from "./app/payment/pages/PaymentPage.tsx";
 import ParkingSchedulePage from "./app/schedule/pages/ParkingSchedulePage.tsx";
 import { useAuth } from "./app/shared/hooks/useAuth";
+import ChatbotWidget from "./app/chatbot/components/ChatbotWidget";
+
+// Componente para integrar el Chatbot con acceso al AuthContext
+const ChatbotIntegration = () => {
+    const { isAuthenticated } = useAuth();
+    return isAuthenticated ? <ChatbotWidget /> : null;
+};
 
 // Componente para manejar la redirección inicial
 const InitialRedirect = () => {
@@ -207,6 +214,7 @@ function App() {
                             } 
                         />
                     </Routes>
+                    <ChatbotIntegration />
                 </div>
             </GoogleMapsProvider>
         </AuthProvider>

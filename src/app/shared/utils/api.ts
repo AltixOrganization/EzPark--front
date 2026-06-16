@@ -1,4 +1,5 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://18.225.149.199';
+//const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://18.225.149.199';
+const API_BASE_URL = 'http://localhost:8080';
 export class ApiService {
     private static instance: ApiService;
 
