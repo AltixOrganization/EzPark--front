@@ -3,6 +3,11 @@ export interface Message {
     role: 'user' | 'assistant';
     content: string;
     timestamp: Date;
+    action?: {
+        type: 'OPEN_RESERVATION_MODAL';
+        parkingId: number;
+        label: string;
+    };
 }
 
 export interface ChatRequest {
@@ -12,4 +17,9 @@ export interface ChatRequest {
 
 export interface ChatResponse {
     reply: string;
+    action?: {
+        type: 'OPEN_RESERVATION_MODAL';
+        parkingId: number;
+        label: string;
+    };
 }

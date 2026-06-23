@@ -5,9 +5,10 @@ import ChatInput from './ChatInput';
 
 interface ChatWindowProps {
     onClose: () => void;
+    onReserve: (parkingId: number) => void;
 }
 
-export const ChatWindow: React.FC<ChatWindowProps> = ({ onClose }) => {
+export const ChatWindow: React.FC<ChatWindowProps> = ({ onClose, onReserve }) => {
     const { messages, isLoading, sendMessage, clearChat } = useChatbot();
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -19,6 +20,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ onClose }) => {
     useEffect(() => {
         scrollToBottom();
     }, [messages, isLoading]);
+
+    // Manejar clic en botón de acción de reserva
+    const handleActionClick = (parkingId: number) => {
+        console.log(`🤖 Chatbot message action click for parkingId: ${parkingId}`);
+        onReserve(parkingId);
+    };
 
     return (
         <div className="flex flex-col w-[380px] h-[500px] max-h-[80vh] bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 transform scale-100 origin-bottom-left animate-fade-in-up">
@@ -35,7 +42,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ onClose }) => {
                         </span>
                     </div>
                 </div>
-                
+
                 <div className="flex items-center gap-1.5">
                     {/* Botón para reiniciar conversación */}
                     <button
@@ -61,10 +68,14 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ onClose }) => {
             </div>
 
             {/* Listado de Mensajes */}
-            <div className="flex-1 overflow-y-auto p-4 bg-gray-50 flex flex-col">
+            <div className="flex-1 overflow-y-auto p-4 bg-gray-50 flex flex-col relative">
                 <div className="flex-1">
                     {messages.map((msg) => (
-                        <ChatMessage key={msg.id} message={msg} />
+                        <ChatMessage
+                            key={msg.id}
+                            message={msg}
+                            onActionClick={handleActionClick}
+                        />
                     ))}
 
                     {/* Indicador de escritura animado */}
@@ -88,3 +99,4 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ onClose }) => {
 };
 
 export default ChatWindow;
+

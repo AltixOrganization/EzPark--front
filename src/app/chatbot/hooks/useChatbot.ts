@@ -62,7 +62,8 @@ export const useChatbot = () => {
                 id: `bot-${Date.now()}`,
                 role: 'assistant',
                 content: response.reply,
-                timestamp: new Date()
+                timestamp: new Date(),
+                action: response.action
             };
 
             setMessages((prev) => [...prev, botMessage]);
